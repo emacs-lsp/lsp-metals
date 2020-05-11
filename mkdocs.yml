@@ -1,0 +1,50 @@
+site_name: LSP Metals
+site_url: https://emacs-lsp.github.io/lsp-metals
+
+nav:
+  - Home: README.md
+  - Changelog: CHANGELOG.md
+  - LSP Mode:
+      - LSP Mode: https://emacs-lsp.github.io/lsp-mode
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+  logo: images/logo.png
+  favicon: images/logo.png
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - tabs
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/emacs-lsp
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/yonchovski
+    - icon: fontawesome/brands/gitter
+      link: https://gitter.im/emacs-lsp/lsp-mode
+
+repo_name: emacs-lsp/lsp-metals
+repo_url: https://github.com/emacs-lsp/lsp-metals
+
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - codehilite
+  - toc:
+      permalink: '#'
+
+plugins:
+  - search
+  - awesome-pages
+  - git-revision-date-localized
+
+google_analytics:
+  - UA-165661257-3
+  - auto
