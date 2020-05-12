@@ -48,78 +48,77 @@
   :package-version '(lsp-mode . "6.1"))
 
 (defcustom lsp-metals-java-home ""
-  "The Java Home directory used for indexing JDK sources and locating
-the `java' binary."
+  "The Java Home directory.
+It's used for indexing JDK sources and locating the `java' binary."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.1"))
 
 (defcustom lsp-metals-scalafmt-config-path ""
-  "Optional custom path to the .scalafmt.conf file. Should be relative
-to the workspace root directory and use forward slashes / for file
-separators (even on Windows)."
+  "Optional custom path to the .scalafmt.conf file.
+Should be relative to the workspace root directory and use forward
+slashes / for file separators (even on Windows)."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.1"))
 
 (defcustom lsp-metals-sbt-script ""
-  "Optional absolute path to an `sbt' executable to use for running
-`sbt bloopInstall'. By default, Metals uses `java -jar sbt-launch.jar'
-with an embedded launcher while respecting `.jvmopts' and `.sbtopts'.
-Update this setting if your `sbt' script requires more customizations
-like using environment variables."
+  "Optional absolute path to an `sbt' executable.
+By default, Metals uses `java -jar sbt-launch.jar' with an embedded
+launcher while respecting `.jvmopts' and `.sbtopts'.  Update this
+setting if your `sbt' script requires more customizations like using
+environment variables."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.1"))
 
 (defcustom lsp-metals-gradle-script ""
-  "Optional absolute path to a `gradle' executable to use for running
-`gradle bloopInstall'. By default, Metals uses gradlew with 5.3.1
-gradle version. Update this setting if your `gradle' script requires
-more customizations like using environment variables."
+  "Optional absolute path to a `gradle' executable.
+By default, Metals uses gradlew with 5.3.1 gradle version.  Update
+this setting if your `gradle' script requires more customizations like
+using environment variables."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.1"))
 
 (defcustom lsp-metals-maven-script ""
-  "Optional absolute path to a `maven' executable to use for
-generating bloop config. By default, Metals uses mvnw maven wrapper
-with 3.6.1 maven version. Update this setting if your `maven' script
-requires more customizations."
+  "Optional absolute path to a `maven' executable.
+By default, Metals uses mvnw maven wrapper with 3.6.1 maven version.
+Update this setting if your `maven' script requires more
+customizations."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-metals-mill-script ""
-  "Optional absolute path to a `mill' executable to use for running
-`mill mill.contrib.Bloop/install'. By default, Metals uses mill
-wrapper script with 0.5.0 mill version. Update this setting if your
-mill script requires more customizations like using environment
-variables."
+  "Optional absolute path to a `mill' executable.
+By default, Metals uses mill wrapper script with 0.5.0 mill version.
+Update this setting if your mill script requires more customizations
+like using environment variables."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-metals-scalafmt-config-path ".scalafmt.conf"
-  "Optional custom path to the .scalafmt.conf file. Should be relative
-to the workspace root directory and use forward slashes / for file
-separators (even on Windows)."
+  "Optional custom path to the .scalafmt.conf file.
+Should be relative to the workspace root directory and use forward
+slashes / for file separators (even on Windows)."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-metals-pants-targets ""
-  "Space separated list of Pants targets to export, for example
-`src/main/scala:: src/main/java::'. Syntax such as `src/{main,test}::'
-is not supported."
+  "Space separated list of Pants targets to export.
+For example, `src/main/scala:: src/main/java::'.  Syntax such as
+`src/{main,test}::' is not supported."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-metals-bloop-sbt-already-installed nil
-  "If true, Metals will not generate a `project/metals.sbt' file under
-the assumption that sbt-bloop is already manually installed in the sbt
-build. Build import will fail with a 'not valid command bloopInstall`
+  "If true, Metals will not generate a `project/metals.sbt' file.
+This assumes that sbt-bloop is already manually installed in the sbt
+build.  Build import will fail with a 'not valid command bloopInstall`
 error in case Bloop is not manually installed in the build when using
 this option."
   :type 'boolean
@@ -127,7 +126,8 @@ this option."
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-metals-bloop-version nil
-  "This version will be used for the Bloop build tool plugin, for any
+  "The version of Bloop to use.
+This version will be used for the Bloop build tool plugin, for any
 supported build tool, while importing in Metals as well as for running
 the embedded server."
   :type '(choice
@@ -137,17 +137,17 @@ the embedded server."
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-metals-super-method-lenses-enabled nil
-  "Super method lenses are visible above methods definition that
-override another methods. Clicking on a lens jumps to super method
-definition. Disabled lenses are not calculated for opened documents
-which might speed up document processing."
+  "If True, super method lenses will be shown.
+Super method lenses are visible above methods definition that override
+another methods.  Clicking on a lens jumps to super method definition.
+Disabled lenses are not calculated for opened documents which might
+speed up document processing."
   :type 'boolean
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-metals-remote-language-server ""
-  "A URL pointing to an endpoint that implements a remote language
-server."
+  "A URL pointing to a remote language server."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-mode . "6.4"))
@@ -192,7 +192,7 @@ server."
   (lsp-send-execute-command "sources-scan" ()))
 
 (defun lsp-metals--doctor-render (html)
-  "Render the Metals doctor html in the current buffer."
+  "Render the Metals doctor HTML in the current buffer."
   (require 'shr)
   (setq-local show-trailing-whitespace nil)
   (setq-local buffer-read-only nil)
@@ -204,22 +204,26 @@ server."
   (setq view-exit-action 'kill-buffer))
 
 (defun lsp-metals--generate-doctor-buffer-name (workspace)
+  "Generate doctor buffer name for the WORKSPACE."
   (format "*Metals Doctor: %s*" (process-id (lsp--workspace-cmd-proc workspace))))
 
 (defun lsp-metals--doctor-run (workspace html)
-  "Focus on a window displaying troubleshooting help from the Metals doctor."
+  "Focus on a window displaying troubleshooting help from the Metals doctor.
+HTML is the help contents.
+WORKSPACE is the workspace the client command was received from."
   (pop-to-buffer (lsp-metals--generate-doctor-buffer-name workspace))
   (lsp-metals--doctor-render html))
 
 (defun lsp-metals--doctor-reload (workspace html)
   "Reload the HTML contents of an open Doctor window, if any.
-Should be ignored if there is no open doctor window."
+Should be ignored if there is no open doctor window.
+WORKSPACE is the workspace the client command was received from."
   (when-let ((buffer (get-buffer (lsp-metals--generate-doctor-buffer-name workspace))))
     (with-current-buffer buffer
       (lsp-metals--doctor-render html))))
 
 (defun lsp-metals--goto-location (_workspace location)
-  "Move the cursor focus to the provided location."
+  "Move the cursor focus to the provided LOCATION."
   (let ((xrefs (lsp--locations-to-xref-items (list location))))
     (if (boundp 'xref-show-definitions-function)
       (with-no-warnings
@@ -229,12 +233,15 @@ Should be ignored if there is no open doctor window."
       (xref--show-xrefs xrefs nil))))
 
 (defun lsp-metals--echo-command (workspace command)
-  "A client command that should be forwarded back to the Metals server."
+  "A client COMMAND that should be forwarded back to the Metals server.
+WORKSPACE is the workspace the client command was received from."
   (with-lsp-workspace workspace
     (lsp-send-execute-command command)))
 
 (defun lsp-metals--publish-decorations (workspace params)
-  "Handle the metals/publishDecorations extension notification."
+  "Handle the metals/publishDecorations extension notification.
+WORKSPACE is the workspace the notification was received from.
+PARAMS are the notification params."
   (with-lsp-workspace workspace
     (let* ((file (lsp--uri-to-path (ht-get params "uri")))
             (buffer (lsp--buffer-for-file file)))
@@ -244,7 +251,7 @@ Should be ignored if there is no open doctor window."
           (mapc #'lsp-metals--make-overlay (ht-get params "options")))))))
 
 (defun lsp-metals--make-overlay (decoration)
-  "Create overlay from metals decoration."
+  "Create overlay from metals DECORATION."
   (let* ((region (lsp--range-to-region (ht-get decoration "range")))
           (content (ht-get (ht-get (ht-get decoration "renderOptions") "after") "contentText"))
           (hover (ht-get (ht-get decoration "hoverMessage") "value"))
@@ -254,8 +261,7 @@ Should be ignored if there is no open doctor window."
     (overlay-put ov 'metals-decoration t)))
 
 (defun lsp-metals--logs-toggle (_workspace)
-  "Focus or remove focus on the output logs reported by the
-server via `window/logMessage'."
+  "Toggle focus on the logs reported by the server via `window/logMessage'."
   (switch-to-buffer (get-buffer-create "*lsp-log*")))
 
 (defun lsp-metals--diagnostics-focus (_workspace)
@@ -267,7 +273,9 @@ server via `window/logMessage'."
         ((and flycheck-mode (fboundp 'flycheck-list-errors)) (flycheck-list-errors))))
 
 (defun lsp-metals--execute-client-command (workspace params)
-  "Handle the metals/executeClientCommand extension notification."
+  "Handle the metals/executeClientCommand extension notification.
+WORKSPACE is the workspace the notification was received from.
+PARAMS are the notification params."
   (when-let ((command (pcase (ht-get params "command")
                         (`"metals-doctor-run" #'lsp-metals--doctor-run)
                         (`"metals-doctor-reload" #'lsp-metals--doctor-reload)
@@ -283,7 +291,7 @@ server via `window/logMessage'."
   "Current buffer used to send `metals/didFocusTextDocument' notification.")
 
 (defun lsp-metals--did-focus ()
-  "Send `metals/didFocusTextDocument' when current buffer changes."
+  "Send `metals/didFocusTextDocument' on buffer switch."
   (unless (eq lsp-metals--current-buffer (current-buffer))
     (setq lsp-metals--current-buffer (current-buffer))
     (lsp-notify "metals/didFocusTextDocument" (lsp--buffer-uri))))
@@ -292,6 +300,9 @@ server via `window/logMessage'."
 (declare-function dap-register-debug-provider "ext:dap-mode" (name conf))
 
 (defun lsp-metals--debug-start (no-debug params)
+  "Start debug session.
+If NO-DEBUG is true launch the program without enabling debugging.
+PARAMS are the action params."
   (dap-register-debug-provider "scala" #'identity)
   (-let [session-params (lsp-send-execute-command
                          "debug-adapter-start"
@@ -308,6 +319,8 @@ server via `window/logMessage'."
            :noDebug no-debug))))
 
 (defun lsp-metals--model-refresh (workspace)
+  "Handle `metals-model-refresh' notification refreshing lenses.
+WORKSPACE is the workspace the notification was received from."
   (->> workspace
        (lsp--workspace-buffers)
        (mapc (lambda (buffer)
@@ -316,7 +329,9 @@ server via `window/logMessage'."
                    (lsp--lens-schedule-refresh t)))))))
 
 (defun lsp-metals--status-string-keymap (workspace command)
-  "Keymap for `metals/status' notification."
+  "Keymap for `metals/status' notification.
+WORKSPACE is the workspace we received notification from.
+COMMAND is the client command to execute."
   (when command
     (-doto (make-sparse-keymap)
       (define-key [mode-line mouse-1]
@@ -325,7 +340,9 @@ server via `window/logMessage'."
           (lsp-metals--execute-client-command workspace (ht ("command" command))))))))
 
 (defun lsp-metals--status-string (workspace params)
-  "Handle `metals/status' notification."
+  "Handle `metals/status' notification.
+WORKSPACE is the workspace we received notification from.
+PARAMS are the notification params."
   (-let (((&hash "text" "hide" "tooltip" "command") params))
     (if (or hide (s-blank-str? text))
         (lsp-workspace-status nil workspace)
