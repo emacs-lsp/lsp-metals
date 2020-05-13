@@ -37,6 +37,7 @@ checkdoc:
 	@for f in *.el ; do \
 		$(CASK) $(EMACS) -Q --batch \
 			-L . \
+	        --eval "(setq checkdoc-arguments-in-order-flag nil)" \
 			--eval "(checkdoc-file \"$$f\")" \
 			*.el 2>&1 | tee -a $(LOG); \
 	done
