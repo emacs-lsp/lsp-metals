@@ -5,7 +5,8 @@
 ;; Version: 1.8.9
 ;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
-;; Keywords:
+;; Keywords: languages, extensions
+;; URL: https://github.com/emacs-lsp/lsp-metals
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
