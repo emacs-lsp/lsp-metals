@@ -382,5 +382,4 @@ PARAMS are the notification params."
 ;;; lsp-metals.el ends here
 
 ;; Local Variables:
-;; flycheck-disabled-checkers: (emacs-lisp-checkdoc)
 ;; End:
