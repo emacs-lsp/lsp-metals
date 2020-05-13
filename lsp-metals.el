@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
-;; Version: 1.8.9
+;; Version: 1.0.0
 ;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
@@ -34,26 +34,26 @@
   "LSP support for Scala, using Metals."
   :group 'lsp-mode
   :link '(url-link "https://scalameta.org/metals")
-  :package-version '(lsp-mode . "6.1"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-server-command "metals-emacs"
   "The command to launch the Scala language server."
   :group 'lsp-metals
   :type 'file
-  :package-version '(lsp-mode . "6.1"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-server-args '()
   "Extra arguments for the Scala language server."
   :group 'lsp-metals
   :type '(repeat string)
-  :package-version '(lsp-mode . "6.1"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-java-home ""
   "The Java Home directory.
 It's used for indexing JDK sources and locating the `java' binary."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.1"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-scalafmt-config-path ""
   "Optional custom path to the .scalafmt.conf file.
@@ -61,7 +61,7 @@ Should be relative to the workspace root directory and use forward
 slashes / for file separators (even on Windows)."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.1"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-sbt-script ""
   "Optional absolute path to an `sbt' executable.
@@ -71,7 +71,7 @@ setting if your `sbt' script requires more customizations like using
 environment variables."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.1"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-gradle-script ""
   "Optional absolute path to a `gradle' executable.
@@ -80,7 +80,7 @@ this setting if your `gradle' script requires more customizations like
 using environment variables."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.1"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-maven-script ""
   "Optional absolute path to a `maven' executable.
@@ -89,7 +89,7 @@ Update this setting if your `maven' script requires more
 customizations."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-mill-script ""
   "Optional absolute path to a `mill' executable.
@@ -98,7 +98,7 @@ Update this setting if your mill script requires more customizations
 like using environment variables."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-scalafmt-config-path ".scalafmt.conf"
   "Optional custom path to the .scalafmt.conf file.
@@ -106,7 +106,7 @@ Should be relative to the workspace root directory and use forward
 slashes / for file separators (even on Windows)."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-pants-targets ""
   "Space separated list of Pants targets to export.
@@ -114,7 +114,7 @@ For example, `src/main/scala:: src/main/java::'.  Syntax such as
 `src/{main,test}::' is not supported."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-bloop-sbt-already-installed nil
   "If true, Metals will not generate a `project/metals.sbt' file.
@@ -124,7 +124,7 @@ error in case Bloop is not manually installed in the build when using
 this option."
   :type 'boolean
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-bloop-version nil
   "The version of Bloop to use.
@@ -135,7 +135,7 @@ the embedded server."
           (const :tag "Default" nil)
           (string :tag "Version"))
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-super-method-lenses-enabled nil
   "If True, super method lenses will be shown.
@@ -145,13 +145,13 @@ Disabled lenses are not calculated for opened documents which might
 speed up document processing."
   :type 'boolean
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 (defcustom lsp-metals-remote-language-server ""
   "A URL pointing to a remote language server."
   :type '(string)
   :group 'lsp-metals
-  :package-version '(lsp-mode . "6.4"))
+  :package-version '(lsp-mode . "1.0"))
 
 
 (lsp-register-custom-settings
