@@ -3,7 +3,7 @@
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0"))
+;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0") (dap-mode "0.3"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
 ;; URL: https://github.com/emacs-lsp/lsp-metals
@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'lsp-mode)
+(require 'dap-mode)
 (require 'view)
 
 (defgroup lsp-metals nil
@@ -297,9 +298,6 @@ PARAMS are the notification params."
     (setq lsp-metals--current-buffer (current-buffer))
     (lsp-notify "metals/didFocusTextDocument" (lsp--buffer-uri))))
 
-(declare-function dap-debug "ext:dap-mode" (conf))
-(declare-function dap-register-debug-provider "ext:dap-mode" (name conf))
-
 (defun lsp-metals--debug-start (no-debug params)
   "Start debug session.
 If NO-DEBUG is true launch the program without enabling debugging.
@@ -360,8 +358,8 @@ PARAMS are the notification params."
                                             (didFocusProvider . t)
                                             (executeClientCommandProvider . t)
                                             (doctorProvider . "html")
-                                            (statusBarProvider . "on"))
-                  :custom-capabilities `((experimental (debuggingProvider . ,(fboundp 'dap-mode))))
+                                            (statusBarProvider . "on")
+                                            (debuggingProvider . t))
                   :notification-handlers (ht ("metals/executeClientCommand" #'lsp-metals--execute-client-command)
                                              ("metals/publishDecorations" #'lsp-metals--publish-decorations)
                                              ("metals/treeViewDidChange" #'ignore)
