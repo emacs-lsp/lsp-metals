@@ -59,19 +59,20 @@
 
 
 (defcustom lsp-metals-treeview-show-when-views-received nil
-  "Automatically show the treeview when Metals sends us the list of
-views (compile/build). Otherwise if nil the user will have to execute
-lsp-metals-treeview to display the treeview explicitly."
+  "Show the treeview automatically when Metals has initialised.
+If nil the user will have to execute 'lsp-metals-treeview' to display
+the treeview explicitly."
   :group 'lsp-metals-treeview
   :type 'boolean)
 
 (defcustom lsp-metals-treeview-logging nil
-  "If non nil log treeview trace/debug messages to the lsp-log for debugging."
+  "If non nil log treeview trace/debug messages to the 'lsp-log' for debugging."
   :group 'lsp-metals-treeview
   :type 'boolean)
 
 (defcustom lsp-metals-treeview-workspace-switch-delay 0.2
-  "Delay in seconds after buffer-list-update-hook is called before
+  "Delay in seconds for switching treeview between workspaces.
+The delay occurs after 'buffer-list-update-hook' is called before
 triggering a switch of treeview when navigating between buffers in
 different workspaces.")
 
@@ -92,12 +93,13 @@ invoke async calls to the lsp server.")
 (defconst lsp-metals-treeview--root-key 'MetalsTree)
 
 (defconst lsp-metals-treeview--icon-dir "icons"
-  "Directory containing Metals treeview icon theme -
-relative to lsp-mode")
+  "Directory containing Metals treeview icon theme.
+Directory is relative to lsp-metals.")
 
 (defconst lsp-metals-treeview--buffer-prefix " *Metals"
-  "Prefix for all Metals treeview buffers, note the space prefix
-which hides the buffers within the buffer list in Emacs.")
+  "Prefix for all Metals treeview buffers.
+Note the space prefix which hides the buffers within the buffer
+list in Emacs.")
 
 ;; Root directory of our lisp files so that we can find icons
 ;; relative to installation.
@@ -109,11 +111,10 @@ which hides the buffers within the buffer list in Emacs.")
   "The directory lsp-metals-treeview.el is stored in.")
 
 (defconst lsp-metals-treeview--metadata-key "metals-treeview"
-  "Metadata key to store treeview data struct within workspace")
+  "Metadata key to store treeview data struct within workspace.")
 
 (defconst lsp-metals-treeview--metals-server-id 'metals
-  "Server id metals lsp client should be registered from within
-lsp-mode.")
+  "Server id metals lsp client should be registered from within lsp-metals.")
 
 ;;
 ;; Treemacs doesn't support a unique key - :-key-form isn't actually defined as
@@ -124,8 +125,9 @@ lsp-mode.")
 (defvar-local lsp-metals-treeview--treemacs-node-index (make-hash-table :test 'equal))
 
 (defvar lsp-metals-treeview--active-view-workspace nil
-  "When the treeview is displayed and visible this variable
-will hold the workspace associated with the instance.")
+  "Workspace associated with the active treeview instance.
+When the treeview is displayed and visible this variable
+will hold the workspace.")
 
 (defun lsp-metals-treeview--position (slot)
   "Side window position of Metals treeview with the given SLOT.
@@ -135,7 +137,8 @@ Uses defaults for treemacs position and width."
     (window-width . ,treemacs-width)))
 
 (defun lsp-metals-treeview--buffer-changed ()
-  "When the buffer is switched check to see if a treeview
+  "Active buffer has changed check if current treeview is valid.
+When the buffer is switched check to see if a treeview
 is currently being displayed and whether we need to show
 an alternative workspace's treeview."
   (with-current-buffer (current-buffer)
@@ -151,52 +154,56 @@ an alternative workspace's treeview."
       (lsp-metals-treeview--show-window (car (lsp-workspaces))))))
 
 (defun lsp-metals-treeview--buffer-list-update ()
+  "Active buffer changed check if treeview needs to be changed.
+If the user switches buffers in different workspaces we need to
+swap the treeview to show the new workspace's treeview."
   (run-with-idle-timer lsp-metals-treeview-workspace-switch-delay
                        nil
                        #'lsp-metals-treeview--buffer-changed))
 
 (defun lsp-metals-treeview--add-workspace-switch-hook ()
-  "Add a buffer-list-update-hook to hide/show the active treeview
-(if currently displayed) when the user switches buffers that are
+  "Add hook to swap treeviews between workspace buffers.
+Add a 'buffer-list-update-hook' to hide/show the active treeview
+- if currently displayed - when the user switches buffers that are
 within another workspace."
   (add-hook 'buffer-list-update-hook
             #'lsp-metals-treeview--buffer-list-update))
 
 (defun lsp-metals-treeview--remove-workspace-switch-hook ()
-  "Remove the buffer-list-update-hook for switching treeview between
+  "Remove the hook to swap treeviews between workspace buffers.
+Remove the 'buffer-list-update-hook' which deals with switching
+treeview when the active buffer switches between different
 workspaces."
   (remove-hook 'buffer-list-update-hook
                #'lsp-metals-treeview--buffer-list-update))
 
 (defun lsp-metals-treeview--log (format &rest args)
-  "Log treeview tracing/debug messages to the lsp-log"
+  "Log treeview tracing/debug messages to the lsp log.
+Use the FORMAT formatting string and ARGS arguments to format
+the message and parameters."
   (when lsp-metals-treeview-logging
     (apply #'lsp-log format args)))
 
 (defun lsp-metals-treeview--get-data (workspace)
-  "Return metals treeview state data associated with
-the WORKSPACE."
+  "Return metals treeview state data associated with the WORKSPACE."
   (ht-get (lsp--workspace-metadata workspace) lsp-metals-treeview--metadata-key))
 
 (defun lsp-metals-treeview--set-data (workspace data)
-  "Set metals treeview state data for the WORKSPACE"
+  "Set metals treeview state DATA for the WORKSPACE."
   (ht-set (lsp--workspace-metadata workspace) lsp-metals-treeview--metadata-key data))
 
 (defun lsp-metals-treeview--add-buffer (workspace buffer)
-  "Add the BUFFER to the list of treeview buffers associated with
-the WORKSPACE."
+  "Add BUFFER to treeview buffers associated with the WORKSPACE."
   (-when-let (state (lsp-metals-treeview--get-data workspace))
     (push buffer (lsp-metals-treeview--data-buffers state))))
 
 (defun lsp-metals-treeview--remove-buffers (workspace)
-  "Clear the buffers stored within treeview state data in
-the WORKSPACE."
+  "Clear buffers stored within treeview state data in the WORKSPACE."
   (-when-let (treeview-data (lsp-metals-treeview--get-data workspace))
     (setf (lsp-metals-treeview--data-buffers treeview-data) nil)))
 
 (defun lsp-metals-treeview--get-buffers (workspace)
-  "Return buffers associated with treeview from the WORKSPACE
-treeview data"
+  "Return buffers associated with treeview from the WORKSPACE treeview data."
   (-when-let (state (lsp-metals-treeview--get-data workspace))
     (lsp-metals-treeview--data-buffers state)))
 
@@ -212,7 +219,9 @@ treeview data"
   (replace-regexp-in-string "metals" "" view-id))
 
 (defun lsp-metals-treeview--log-state (view-state)
-  "Log details of the views sent to us from Metals."
+  "Log details of the views sent to us from Metals.
+VIEW-STATE will contain the data describing the views sent to us
+by Metals."
   (lsp-metals-treeview--log "Views received from Metals:")
   (mapc (lambda (view-data)
           (lsp-metals-treeview--log "%s: %s"
@@ -229,10 +238,10 @@ treeview data"
            (directory-file-name (lsp--workspace-root workspace)))))
 
 (defun lsp-metals-treeview--waiting-message-buffer-name (workspace)
-  "Return the buffer name of a temporary buffer displaying a message
-informing the user that Metals has not sent any treeview information for
-this WORKSPACE.  When the views arrive this buffer will be removed and
-replaced with the treeviews."
+  "Return the name of a temporary buffer awaiting information from Metals.
+We display a message informing the user that Metals has not sent any treeview
+information for this WORKSPACE.  When the views arrive this buffer will be
+removed and replaced with the treeviews."
   (format "%s %s*"
           lsp-metals-treeview--buffer-prefix
           (file-name-nondirectory
@@ -256,9 +265,9 @@ be live in the background."
     (lsp-metals-treeview--remove-workspace-switch-hook)))
 
 (defun lsp-metals-treeview--get-visible-buffers ()
-  "Retrieve buffers associated with the current selected
-frame. Check to see if any of these buffers are metals
-treeview buffers and if so return the buffers."
+  "Retrieve buffers associated with the current selected frame.
+Check to see if any of these buffers are metals treeview buffers and
+if so return the buffers."
   ;; retrieve any treeview buffers that are visible
   (->> (window-list (selected-frame))
        (-keep (lambda (window)
@@ -274,29 +283,27 @@ treeview buffers and if so return the buffers."
     (equal visible-buffers workspace-buffers)))
 
 (defun lsp-metals-treeview--exists? (workspace)
-  "Does a Metals Treeview exist for the WORKSPACE, the treeview
-may not be visible but still exists in the background."
+  "Does a Metals Treeview exist for the WORKSPACE?
+The treeview may not be visible but still exists in the background."
   (-when-let (buffers (lsp-metals-treeview--get-buffers workspace))
     (-all-p 'buffer-live-p buffers)))
 
 (defun lsp-metals-treeview--hidden? (workspace)
-  "Does the metals treeview associated with WORKSPACE exist
-but not visible?"
+  "Does the metals treeview associated with WORKSPACE exist but not visible?"
   (and (lsp-metals-treeview--exists? workspace)
        (not lsp-metals-treeview--visible? workspace)))
 
 (defun lsp-metals-treeview--get-visibility (workspace)
-  "Return visibility status of metals treeview associated
-with WORKSPACE. Return 'visible, 'hidden, 'none depending on state of
-treeview."
+  "Return visibility status of metals treeview associated with WORKSPACE.
+Return 'visible, 'hidden, 'none depending on state of treeview."
   (cond
    ((lsp-metals-treeview--visible? workspace) 'visible)
    ((lsp-metals-treeview--exists? workspace)  'hidden)
    (t 'none)))
 
 (defun lsp-metals-treeview--show-window (workspace &optional select-window?)
-  "Show metals treeview window associated with WORKSPACE and
-optionally select the window based on the boolean SELECT-WINDOW?
+  "Show metals treeview window associated with WORKSPACE.
+Optionally select the window based on SELECT-WINDOW? being True.
 If the treeview window is hidden or not visible (not created)
 then show the window."
   (let* ((visibility (lsp-metals-treeview--get-visibility workspace))
@@ -311,7 +318,7 @@ then show the window."
 (defun lsp-metals-treeview--delete-window (&optional workspace workspace-shutdown?)
   "Delete the metals treeview window associated with the WORKSPACE.
 If WORKSPACE is not provided the current treeview buffer local variable
-WORKSPACE will be used. This function is also called from an lsp hook
+WORKSPACE will be used.  This function is also called from an lsp hook
 which will be called when the workspace is shutdown - in this case we
 won't notify Metals of view being hidden if WORKSPACE-SHUTDOWN? is
 t."
@@ -323,7 +330,7 @@ t."
             ;; not initialised.
             (when (and lsp-metals-treeview--view-id
                        (not workspace-shutdown?)
-                       (equal 'initialized (lsp--workspace-status cur-workspace))) 
+                       (equal 'initialized (lsp--workspace-status cur-workspace)))
               (lsp-metals-treeview--send-visibility-did-change
                lsp-metals-treeview--current-workspace
                lsp-metals-treeview--view-id
@@ -337,11 +344,11 @@ t."
     (remove-hook 'lsp-after-uninitialized-hook #'lsp-metals-treeview--delete-window)))
 
 (defun lsp-metals-treeview--on-workspace-shutdown (workspace)
-  "Handler for lsp workspace shutdown, ensure we close our
-treeview windows/buffers. Under this scenario we shouldn't contact Metals
-to update view visibility status, so we pass through workspace-shutdown
-true so that the delete-window function has the context of the window
-closing."
+  "Handler for lsp WORKSPACE shutdown.
+Ensure we close our treeview windows/buffers.  Under this scenario we
+shouldn't contact Metals to update view visibility status, so we pass
+through workspace-shutdown true so that the 'delete-window' function has
+the context of the window closing."
   (lsp-metals-treeview--delete-window workspace t))
 
 ;;
@@ -353,7 +360,7 @@ closing."
   (let ((m (make-sparse-keymap)))
     (define-key m (kbd "q") #'lsp-metals-treeview--hide-window)
     m)
-  "Keymap for `lsp-metals-treeview-mode'.")
+  "Keymap for 'lsp-metals-treeview-mode'.")
 
 (define-minor-mode lsp-metals-treeview-mode "LSP Metals Treeview minor mode"
   nil nil nil
@@ -362,9 +369,10 @@ closing."
 
 
 (defun lsp-metals-treeview--show-view (workspace view-id position)
-  "Show or create the side window and treeview for the Metals VIEW-ID
-within the current WORKSPACE.  The window will be positioned as a side
-window by POSITION and is of the form '((side left))."
+  "Show or create the side window and treeview.
+The window will be created for the Metals VIEW-ID within the current WORKSPACE.
+The window will be positioned as a side window by POSITION and is of the
+form '((side left))."
   (let ((buffer-name (lsp-metals-treeview--buffer-name workspace
                                                        (lsp-metals-treeview--view-name view-id))))
     ;; When opening or refreshing the view do temporarily switch focus but restore
@@ -407,9 +415,15 @@ window by POSITION and is of the form '((side left))."
 
 
 (defun lsp-metals-treeview--get-waiting-message-buffer (workspace)
+  "Return the temporary 'waiting' buffer associated with the WORKSPACE.
+The temporary buffer will be visible while we wait for Metals to send us
+view information."
   (get-buffer (lsp-metals-treeview--waiting-message-buffer-name workspace)))
 
 (defun lsp-metals-treeview--show-waiting-message (workspace position)
+  "Show message indicating we're still waiting for Metals view information.
+Message will be associated with the WORKSPACE and message will be displayed
+according to POSITION which is defined by 'display-buffer-in-side-window'."
   (let* ((buffer-name (lsp-metals-treeview--waiting-message-buffer-name workspace))
          (buffer (get-buffer buffer-name)))
     (unless buffer
@@ -422,8 +436,9 @@ window by POSITION and is of the form '((side left))."
           (read-only-mode))))))
 
 (defun lsp-metals-treeview--display-views (workspace views slot)
-  "Recursive function to display each view in VIEWS in the
-side window based based on an increasing SLOT number position."
+  "Recursive function to display each view in VIEWS.
+The views will be associated with the WORKSPACE and displayed in the side
+window based based on an increasing SLOT number position."
   (when-let ((view (car views)))
     (lsp-metals-treeview--show-view workspace
                            (alist-get :view-id view)
@@ -432,17 +447,18 @@ side window based based on an increasing SLOT number position."
     (lsp-metals-treeview--display-views workspace (cdr views) (+ 1 slot))))
 
 (defun lsp-metals-treeview--select-window (workspace)
-  "Switch focus to the treeview window, select the first
-view/buffer in the treeview window."
+  "Switch focus to the treeview window in the given WORKSPACE.
+Select the first view/buffer in the treeview window."
   (select-window (get-buffer-window
                   (car (lsp-metals-treeview--get-buffers workspace)))))
 
 (defun lsp-metals-treeview--show-views (workspace views slot &optional select-treeview-window)
   "Display each view returned by Metals in our sidebar treeview window.
 Views are displayed for this WORKSPACE, VIEWS is a list of alist containing
-the views taken from the lsp-metals-treeview--data structure. SLOT is a
+the views taken from the lsp-metals-treeview--data structure.  SLOT is a
 numeric position starting from 0 where the treeview will be positioned
-relative to the others. "
+relative to the others.  when SELECT-TREEVIEW-WINDOW is 't' the treeview
+window will be selected and have focus."
   (if (not (null views))
       (progn
         (lsp-metals-treeview--display-views workspace views slot)
@@ -466,8 +482,9 @@ relative to the others. "
     (lsp-metals-treeview--show-waiting-message workspace (lsp-metals-treeview--position slot))))
 
 (defun lsp-metals-treeview--refresh (workspace params)
-  "Top level treeview changed - Metals has potentially given
-us a new set of views."
+  "Top level treeview changed, Metals has sent new view definitions.
+Views will be associated with the WORKSPACE, we will ignore the PARAMS sent
+by Metals in this case."
   (lsp-metals-treeview--log "Received metals views for workspace %s"
                             (lsp--workspace-root workspace))
   
@@ -498,8 +515,11 @@ us a new set of views."
 
 
 (defun lsp-metals-treeview--cache-add-nodes (metals-nodes current-treemacs-node)
-  "Build an index of treemacs nodes nodeUri -> treemacs path. We can use this
-to find nodes within the tree based on nodeUri which Metals will send us."
+  "Build an index of treemacs nodes nodeUri -> treemacs path.
+We can use this to find nodes within the tree based on nodeUri which
+Metals will send us.  METALS-NODES contains a list of new nodes added to
+the tree to be displayed, CURRENT-TREEMACS-NODE is the paren to the new
+nodes."
   (let ((parent-path (treemacs-button-get current-treemacs-node :path)))
     (-map (lambda (metals-node)
             (let ((node-uri (ht-get metals-node "nodeUri")))
@@ -509,8 +529,9 @@ to find nodes within the tree based on nodeUri which Metals will send us."
           metals-nodes)))
 
 (defun lsp-metals-treeview--find-node (node-uri)
-  "Find treemacs node based on node-uri via our local index. If the node
-cannot be found in the tree make sure we cleanup the cache and remove it."
+  "Find treemacs node based on NODE-URI via our local index.
+If the node cannot be found in the tree make sure we cleanup the cache
+and remove it."
   (-if-let* ((path (ht-get lsp-metals-treeview--treemacs-node-index node-uri))
              (found-node (treemacs-find-node path)))
       found-node
@@ -519,6 +540,9 @@ cannot be found in the tree make sure we cleanup the cache and remove it."
     nil))
 
 (defun lsp-metals-treeview--update-node (workspace node)
+  "Update the treemacs NODE in the treeview associated with WORKSPACE.
+Metals will inform us of updates to individual nodes, here we ensure the
+label is updated to reflect their updated value."
   (lsp-metals-treeview--log "in lsp-metals-treeview--update-node %s" (ht-get node "nodeUri"))
    (let* ((treeview-buffer-name (lsp-metals-treeview--buffer-name workspace
                                                                  (ht-get node "viewId")))
@@ -541,7 +565,9 @@ cannot be found in the tree make sure we cleanup the cache and remove it."
 
 
 (defun lsp-metals-treeview--changed (workspace params)
-  "The treeview nodes have changed, update our treemacs tree."
+  "The treeview nodes have changed, update our treemacs treeview.
+The treeview is associated with WORKSPACE and the Metals parameters sent via
+PARAMS."
   (lsp-metals-treeview--log "treeview changed\n%s" (json-encode params))
   ;; process list of nodes that have changed
   (mapc (lambda (node)
@@ -549,8 +575,9 @@ cannot be found in the tree make sure we cleanup the cache and remove it."
         (ht-get params "nodes")))
 
 (defun lsp-metals-treeview--views-update-message? (params)
-  "When metals updates the views (build/compile) or sends us their initial
-definition for it will contain a list with viewIds without any nodeUris.
+  "Has metals sent us a message indicating the views have been updated?
+When metals updates the views (build/compile) or sends us their initial
+definition it will contain a list with viewIds without any nodeUris.
 PARAMS contains the hashtable of view definitions under the 'nodes' key."
   (-all? (lambda (node)
            (and (ht-get node "viewId") (not (ht-get node "nodeUri"))))
@@ -574,7 +601,7 @@ workspace of the project."
   "Query children in the view given by VIEW-ID.
 An optional NODE-URI can be used to query children of a specific node
 within the view.  This call is synchronous and will return the response
-from the call to metas/treeViewChildren. Under the hood LSP-REQUEST will
+from the call to metas/treeViewChildren.  Under the hood LSP-REQUEST will
 send the request asynchronously and wait for the response."
   (lsp-metals-treeview--log "Sending metals/treeViewChildren")
   (lsp-request "metals/treeViewChildren"
@@ -583,10 +610,11 @@ send the request asynchronously and wait for the response."
 
 
 (defun lsp-metals-treeview--send-visibility-did-change (workspace view-id visible?)
-  "Send metals/treeViewVisibilityDidChange to inform metals when views
-are shown/hidden within the editor. WORKSPACE is the current lsp workspace,
-VIEW-ID is the view for which the visibility has changed described by the boolean
-value VISIBLE - t or nil."
+  "Send metals/treeViewVisibilityDidChange when views are shown/hidden.
+We need to keep Metals informed when views are shown/hidden so it can optimise
+the notification messages it sends us.  WORKSPACE is the current lsp workspace,
+VIEW-ID is the view for which the visibility has changed described by the
+boolean value VISIBLE - t or nil."
   (lsp-metals-treeview--log "view visibility changed %s %s" view-id visible?)
   (let ((params (list :viewId view-id
                       :visible visible?)))
@@ -597,10 +625,10 @@ value VISIBLE - t or nil."
                            :mode 'detached))))
 
 (defun lsp-metals-treeview--send-node-collapse-did-change (workspace view-id node-uri collapsed?)
-  "Send metals/treeViewNodeCollapseDidChange to inform Metals when a
-treeview node has collapsed or expanded.  WORKSPACE is the current workspace,
-VIEW-ID the id of the view containing the node with NODE-URI which has been
-collapsed or expanded based on the boolean COLLAPSED? either t or nil."
+  "Send metals/treeViewNodeCollapseDidChange when a node has collapsed/expanded.
+WORKSPACE is the current workspace, VIEW-ID the id of the view containing the
+node with NODE-URI which has been collapsed or expanded based on the boolean
+COLLAPSED? either t or nil."
   (lsp-metals-treeview--log "sending metals/treeViewNodeCollapseDidChange viewId %s nodeUri %s collapsed? %s"
                             view-id node-uri collapsed?)
   (let ((params (list :viewId view-id
@@ -616,10 +644,11 @@ collapsed or expanded based on the boolean COLLAPSED? either t or nil."
                          :mode 'detached))))
 
 (defun lsp-metals-treeview--get-children (view-id &optional node-uri)
-  "Retrieve children of the view given by the VIEW-ID and optionally children
-of the node given by the NODE-URI.  Without a NODE-URI the top level child items
-will be returned for the view. Returns a list of nodes with values converted
-from json to hash tables."
+  "Retrieve children of the view given by the VIEW-ID and optionally the node.
+Children of the view can be returned and optionally by specifying a NODE-URI
+this function will return the node's children.  Without a NODE-URI the top
+level child items will be returned for the view.  Returns a list of nodes
+with values converted from json to hash tables."
   (with-lsp-workspace lsp-metals-treeview--current-workspace
     ;; return nodes element and convert from vector to list.
     (let* ((current-tree-node (treemacs-node-at-point))
@@ -630,8 +659,8 @@ from json to hash tables."
       children)))
 
 (defun lsp-metals-treeview--get-children-current-node (&rest _)
-  "Retrieve children of the currently selected node in the treeview - see
-LSP-METALS-TREEVIEW--GET-CHILDREN."
+  "Retrieve children of the currently selected node in the treeview.
+See LSP-METALS-TREEVIEW--GET-CHILDREN."
   (-when-let* ((tree-node (treemacs-node-at-point))
                (metals-node (treemacs-button-get tree-node :node)))
     (lsp-metals-treeview--get-children (ht-get metals-node "viewId")
@@ -642,15 +671,18 @@ LSP-METALS-TREEVIEW--GET-CHILDREN."
 ;;
 
 (defun lsp-metals-treeview--state (item)
+  "Return the state of the treeview ITEM."
   (if (ht-get item "collapseState")
       treemacs-metals-node-closed-state
     treemacs-metals-leaf-state))
 
 (defun lsp-metals-treeview--icon (metals-node open-form?)
-  "Return icon based on METALS-NODE past and if the node is expanding
-based on OPEN-FORM? being t. Check if icon matches one of our icons
-for the Metals theme and if not display a standard +/- if this is an
-expandable node. If the node isn't expandable for now do not show an icon. "
+  "Return icon based on METALS-NODE.
+The icon will depend on the individual METALS-NODE and whether the
+node is expanding based on OPEN-FORM? being True.  Check if icon matches
+one of our icons for the Metals theme and if not display a standard +/-
+if this is an expandable node.  If the node isn't expandable for now
+do not show an icon."
   (-if-let (icon (ht-get metals-node "icon"))
       (treemacs-get-icon-value icon nil "Metals")
     (if (ht-get metals-node "collapseState")
@@ -670,8 +702,9 @@ expandable node. If the node isn't expandable for now do not show an icon. "
 ;;     nil))
 
 (defun lsp-metals-treeview--send-execute-command (command &optional args)
-  "Create and send a 'workspace/executeCommand' message having command COMMAND and optional ARGS.
-Send the command asynchronously rather than the default lsp-mode of synchronous."
+  "Create and send a 'workspace/executeCommand'.
+The message will contain the COMMAND and optional ARGS.  Send the
+command asynchronously rather than the default 'lsp-mode' of synchronous."
   ;; Current lsp-send-execute-command is synchronous - use our own async call.
   (lsp-request-async "workspace/executeCommand"
                      (list :command command
@@ -694,11 +727,10 @@ Send the command asynchronously rather than the default lsp-mode of synchronous.
        (ht-get command "arguments")))))
 
 (defun lsp-metals-treeview--on-node-collapsed (metals-node collapsed?)
-  "Send metals/treeViewNodeCollapseDidChange to inform Metals
-that the node has been collapsed or expanded. METALS-NODE is a hash table
-describing the metals node attached to treemacs in the :node key - passed as
-item during render. COLLAPSED? either t or nil dependong on if the node has been
-collapsed or expanded."
+  "Send metals/treeViewNodeCollapseDidChange to indicate collapsed/expanded.
+METALS-NODE is a hash table describing the metals node attached to treemacs
+in the :node key - passed as item during render.  COLLAPSED? either t or nil
+dependong on if the node has been collapsed or expanded."
   (lsp-metals-treeview--send-node-collapse-did-change lsp-metals-treeview--current-workspace
                                                       lsp-metals-treeview--view-id
                                                       (ht-get metals-node "nodeUri")
@@ -802,15 +834,17 @@ collapsed or expanded."
 
 
 (defun lsp-metals-treeview--add-notification-handlers (metals-client)
-  "Add Metals treeview notification handlers for the lsp-client
-METALS-CLIENT."
+  "Add Metals treeview notification handlers for the lsp-client.
+METALS-CLIENT contains the lsp-client instance."
   (let ((handlers (lsp--client-notification-handlers metals-client)))
     (ht-set handlers "metals/treeViewDidChange" #'lsp-metals-treeview--did-change)))
 
 (defun lsp-metals-treeview--add-custom-capabilities (metals-client enable?)
-  "Metals requires an experimental treeViewProvider capability to
-be sent during initialisation. Add to our custom capabilities so
-that this will be sent during initial connection."
+  "Add experimental treeViewProvider capability so Metals activates treeview.
+Metals requires us to send an experimental flag to indicate that the editor
+can support treeview functionality during initialisation.  METALS-CLIENT is
+the lsp-client and ENABLE? will indicate whether the treeview should be
+enabled or left disabled."
   (interactive)
   (let ((custom-capabilities
          (append (lsp--client-custom-capabilities metals-client)
@@ -821,8 +855,8 @@ that this will be sent during initial connection."
     (setf (lsp--client-custom-capabilities metals-client) custom-capabilities)))
 
 (defun lsp-metals-treeview (&optional workspace)
-  "Display the Metals treeview window for the WORKSPACE (optional).  If
-WORKSPACE is not specified obtain the current workspace for the file in
+  "Display the Metals treeview window for the WORKSPACE (optional).
+If WORKSPACE is not specified obtain the current workspace for the file in
 the current buffer."
   (interactive)
   (-if-let* ((workspace
@@ -835,9 +869,10 @@ the current buffer."
 
 ;;;###autoload
 (defun lsp-metals-treeview-enable (enable)
-  "Enable Metals treeview extension - send capability
-to Metals to indicate we want treeview messages and wire up notification
-handlers."
+  "Enable Metals treeview extension.
+Send capability to Metals to indicate we want treeview messages and wire
+up notification handlers.  Treeview extension will be enabled based on
+ENABLE being True."
   (interactive)
   (with-eval-after-load 'lsp-metals
     (let ((metals-client (ht-get lsp-clients lsp-metals-treeview--metals-server-id)))
@@ -847,6 +882,7 @@ handlers."
 
 ;; Debug helpers to track down issues with treemacs and aid development.
 (defun lsp-metals-treemacs--debug-node ()
+  "Debug helper function to display treemacs node information."
   (interactive)
   (-let [node (treemacs-node-at-point)]
     (message
