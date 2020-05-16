@@ -3,8 +3,9 @@
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0") (dap-mode "0.3"))
-;; Author: Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
+;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0") (dap-mode "0.3") (dash "2.14.1") (dash-functional "2.14.1"))
+;; Author: Ross A. Baker <ross@rossabaker.com>
+;;      Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
 ;; URL: https://github.com/emacs-lsp/lsp-metals
 
@@ -29,6 +30,7 @@
 
 (require 'lsp-mode)
 (require 'dap-mode)
+(require 'lsp-metals-treeview)
 (require 'view)
 
 (defgroup lsp-metals nil
@@ -359,10 +361,11 @@ PARAMS are the notification params."
                                             (executeClientCommandProvider . t)
                                             (doctorProvider . "html")
                                             (statusBarProvider . "on")
-                                            (debuggingProvider . t))
+                                            (debuggingProvider . t)
+                                            (treeViewProvider . t))
                   :notification-handlers (ht ("metals/executeClientCommand" #'lsp-metals--execute-client-command)
                                              ("metals/publishDecorations" #'lsp-metals--publish-decorations)
-                                             ("metals/treeViewDidChange" #'ignore)
+                                             ("metals/treeViewDidChange" #'lsp-metals-treeview--did-change)
                                              ("metals-model-refresh" #'lsp-metals--model-refresh)
                                              ("metals/status" #'lsp-metals--status-string))
                   :action-handlers (ht ("metals-debug-session-start" (-partial #'lsp-metals--debug-start :json-false))

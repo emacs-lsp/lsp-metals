@@ -1,9 +1,13 @@
 ;;; lsp-metals-treeview.el --- LSP Scala Metals Treeview   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019 Darren Syzling <dsyzling@gmail.com>
+;; Copyright (C) 2019 Darren Syzling <dsyzling@gmail.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
+;; Version: 1.0.0
+;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0") (dash "2.14.1") (dash-functional "2.14.1") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
 ;; Author: Darren Syzling <dsyzling@gmail.com>
-;; Keywords:
+;;      Evgeny Kurnevsky <kurnevsky@gmail.com>
+;; Keywords: languages, extensions
+;; URL: https://github.com/emacs-lsp/lsp-metals
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -39,12 +43,6 @@
 ;; a simple starting point to test the treeview with metals and we can evolve
 ;; to a Hydra like interface to provide a richer keyboard experience in future.
 ;;
-;; Example of use-package initialisation to enable Metals Treeview
-;;  (use-package lsp-treemacs
-;;    :config
-;;    (lsp-metals-treeview-enable t)
-;;    (setq lsp-metals-treeview-show-when-views-received t))
-;;
 
 ;;; Code:
 
@@ -74,7 +72,9 @@ the treeview explicitly."
   "Delay in seconds for switching treeview between workspaces.
 The delay occurs after 'buffer-list-update-hook' is called before
 triggering a switch of treeview when navigating between buffers in
-different workspaces.")
+different workspaces."
+  :group 'lsp-metals-treeview
+  :type 'float)
 
 (cl-defstruct lsp-metals-treeview--data
   (views nil)
@@ -147,7 +147,7 @@ an alternative workspace's treeview."
                lsp-metals-treeview--active-view-workspace
                (not (member lsp-metals-treeview--active-view-workspace
                             (lsp-workspaces))))
-      
+
       ;; hide current treeview and show new window associated with
       ;; the current workspace of file in buffer.
       (lsp-metals-treeview--hide-window lsp-metals-treeview--active-view-workspace)
@@ -291,7 +291,7 @@ The treeview may not be visible but still exists in the background."
 (defun lsp-metals-treeview--hidden? (workspace)
   "Does the metals treeview associated with WORKSPACE exist but not visible?"
   (and (lsp-metals-treeview--exists? workspace)
-       (not lsp-metals-treeview--visible? workspace)))
+       (not (lsp-metals-treeview--visible? workspace))))
 
 (defun lsp-metals-treeview--get-visibility (workspace)
   "Return visibility status of metals treeview associated with WORKSPACE.
@@ -462,7 +462,7 @@ window will be selected and have focus."
   (if (not (null views))
       (progn
         (lsp-metals-treeview--display-views workspace views slot)
-        
+
         (-when-let (buffer (lsp-metals-treeview--get-waiting-message-buffer workspace))
           (kill-buffer buffer))
 
@@ -474,10 +474,10 @@ window will be selected and have focus."
         ;; When user switches between files in workspaces automatically switch
         ;; the treeview to the appropriate one.
         (lsp-metals-treeview--add-workspace-switch-hook)
-        
+
         ;; Add hook to close our treeview when the workspace is shutdown.
         (add-hook 'lsp-after-uninitialized-hook #'lsp-metals-treeview--on-workspace-shutdown))
-        
+
     ;; No views are available - show temp message.
     (lsp-metals-treeview--show-waiting-message workspace (lsp-metals-treeview--position slot))))
 
@@ -487,12 +487,12 @@ Views will be associated with the WORKSPACE, we will ignore the PARAMS sent
 by Metals in this case."
   (lsp-metals-treeview--log "Received metals views for workspace %s"
                             (lsp--workspace-root workspace))
-  
+
   ;; Close any current treeview window for this workspace, so we can
   ;; recreate it.
   (when (lsp-metals-treeview--exists? workspace)
     (lsp-metals-treeview--delete-window workspace))
-  
+
   (let ((state (make-lsp-metals-treeview--data
                 :views (mapcar
                         (lambda (node)
@@ -500,7 +500,7 @@ by Metals in this case."
                             (:view-name  .  ,(replace-regexp-in-string "metals" ""
                                                                        (ht-get node "viewId")))))
                         (ht-get params "nodes")))))
-    
+
     (lsp-metals-treeview--log-state state)
     (lsp-metals-treeview--set-data workspace state)
 
@@ -554,13 +554,13 @@ label is updated to reflect their updated value."
             (ht-set (treemacs-button-get tree-node :node)
                     "label"
                     (ht-get node "label"))
-            
+
             ;; Currently the only way to re-render the label of an item is
             ;; for the parent to call render-node on its children. So
             ;; we update the parent of the node we're changing.
             ;; An enhancement to treemacs is in the works where  the label
             ;; can be updated directly.
-            (treemacs-update-node (treemacs-parent-of tree-node) nil))
+            (treemacs-update-node (treemacs-button-get tree-node :parent) nil))
         (lsp-metals-treeview--log "Failed to find node in treeview")))))
 
 
@@ -591,7 +591,7 @@ workspace of the project."
   (lsp-metals-treeview--log "In lsp-metals-treeview--did-change %s\n%s"
                             (lsp--workspace-root workspace)
                             (json-encode params))
-  
+
   (if (lsp-metals-treeview--views-update-message? params)
       (lsp-metals-treeview--refresh workspace params)
     (lsp-metals-treeview--changed workspace params)))
@@ -670,12 +670,6 @@ See LSP-METALS-TREEVIEW--GET-CHILDREN."
 ;; UI tree view using treemacs
 ;;
 
-(defun lsp-metals-treeview--state (item)
-  "Return the state of the treeview ITEM."
-  (if (ht-get item "collapseState")
-      treemacs-metals-node-closed-state
-    treemacs-metals-leaf-state))
-
 (defun lsp-metals-treeview--icon (metals-node open-form?)
   "Return icon based on METALS-NODE.
 The icon will depend on the individual METALS-NODE and whether the
@@ -690,7 +684,7 @@ do not show an icon."
          (if open-form? 'expanded 'collapsed)
          nil
          lsp-treemacs-theme)
-        
+
       ;; leaf node without an icon
       (treemacs-as-icon "   " 'face 'font-lock-string-face))))
 
@@ -749,7 +743,7 @@ dependong on if the node has been collapsed or expanded."
   (progn
     ;; root icon
     (treemacs-create-icon :file "logo.png"        :extensions (root)       :fallback "")
-    
+
     ;; symbol icons
     (treemacs-create-icon :file "method.png"      :extensions ("method"))
     (treemacs-create-icon :file "class.png"       :extensions ("class"))
@@ -766,7 +760,7 @@ dependong on if the node has been collapsed or expanded."
 ;; replace lsp-metals-treeview--state to return treemacs-metals-node-closed-state
 ;;
 (treemacs-define-leaf-node metals-leaf 'dynamic-icon
-  
+
   :ret-action #'lsp-metals-treeview--exec-node-action
   :mouse1-action (lambda (&rest args)
                    (interactive)
@@ -787,7 +781,7 @@ dependong on if the node has been collapsed or expanded."
                    (treemacs-button-get (treemacs-node-at-point) :node) t)
   :icon-closed-form (lsp-metals-treeview--icon
                      (treemacs-button-get (treemacs-node-at-point) :node) nil)
-  
+
   :query-function (lsp-metals-treeview--get-children-current-node)
 
   :ret-action 'lsp-metals-treeview--exec-node-action
@@ -796,7 +790,7 @@ dependong on if the node has been collapsed or expanded."
                  (treemacs-button-get node :node) nil)
   :after-collapse (lsp-metals-treeview--on-node-collapsed
                    (treemacs-button-get node :node) t)
-  
+
   :render-action
   (treemacs-render-node
    :icon (lsp-metals-treeview--icon item nil)
@@ -833,26 +827,11 @@ dependong on if the node has been collapsed or expanded."
   :root-key-form lsp-metals-treeview--root-key)
 
 
-(defun lsp-metals-treeview--add-notification-handlers (metals-client)
-  "Add Metals treeview notification handlers for the lsp-client.
-METALS-CLIENT contains the lsp-client instance."
-  (let ((handlers (lsp--client-notification-handlers metals-client)))
-    (ht-set handlers "metals/treeViewDidChange" #'lsp-metals-treeview--did-change)))
-
-(defun lsp-metals-treeview--add-custom-capabilities (metals-client enable?)
-  "Add experimental treeViewProvider capability so Metals activates treeview.
-Metals requires us to send an experimental flag to indicate that the editor
-can support treeview functionality during initialisation.  METALS-CLIENT is
-the lsp-client and ENABLE? will indicate whether the treeview should be
-enabled or left disabled."
-  (interactive)
-  (let ((custom-capabilities
-         (append (lsp--client-custom-capabilities metals-client)
-                 `((experimental
-                    (treeViewProvider . ,(if enable?
-                                             t
-                                           :json-false)))))))
-    (setf (lsp--client-custom-capabilities metals-client) custom-capabilities)))
+(defun lsp-metals-treeview--state (item)
+  "Return the state of the treeview ITEM."
+  (if (ht-get item "collapseState")
+      treemacs-metals-node-closed-state
+    treemacs-metals-leaf-state))
 
 (defun lsp-metals-treeview (&optional workspace)
   "Display the Metals treeview window for the WORKSPACE (optional).
@@ -867,21 +846,8 @@ the current buffer."
     (message "Current buffer is not within Metals workspace")))
 
 
-;;;###autoload
-(defun lsp-metals-treeview-enable (enable)
-  "Enable Metals treeview extension.
-Send capability to Metals to indicate we want treeview messages and wire
-up notification handlers.  Treeview extension will be enabled based on
-ENABLE being True."
-  (interactive)
-  (with-eval-after-load 'lsp-metals
-    (let ((metals-client (ht-get lsp-clients lsp-metals-treeview--metals-server-id)))
-      (lsp-metals-treeview--add-notification-handlers metals-client)
-      (lsp-metals-treeview--add-custom-capabilities metals-client enable))))
-
-
 ;; Debug helpers to track down issues with treemacs and aid development.
-(defun lsp-metals-treemacs--debug-node ()
+(defun lsp-metals-treeview--debug-node ()
   "Debug helper function to display treemacs node information."
   (interactive)
   (-let [node (treemacs-node-at-point)]
@@ -908,5 +874,4 @@ Metals Item: %s"
 ;;; lsp-metals-treeview.el ends here
 
 ;; Local Variables:
-;; flycheck-disabled-checkers: (emacs-lisp-checkdoc)
 ;; End:
