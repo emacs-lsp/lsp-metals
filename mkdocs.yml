@@ -46,5 +46,5 @@ plugins:
   - git-revision-date-localized
 
 google_analytics:
-  - UA-165661257-3
+  - UA-165661257-4
   - auto
