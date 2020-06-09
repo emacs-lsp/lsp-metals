@@ -1,8 +1,8 @@
 :root {
-  --md-primary-fg-color: #C22D40;
-  --md-accent-fg-color: #BD013F;
-  --md-default-fg-color: #C22D40;
-  --md-default-fg-color--light: #FD3A4E;
+  --md-primary-fg-color: #087E8B;
+  --md-accent-fg-color: #1B555C;
+  --md-default-fg-color: #24292E;
+  --md-default-fg-color--light: #1B555C;
 }
 
 .md-grid {
@@ -10,5 +10,5 @@
 }
 
 .md-typeset a {
-  color: #FD3A4E;
+  color: #087E8B;
 }
