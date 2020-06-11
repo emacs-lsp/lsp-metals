@@ -30,6 +30,7 @@
 
 (require 'lsp-mode)
 (require 'dap-mode)
+(require 'lsp-metals-protocol)
 (require 'lsp-metals-treeview)
 (require 'view)
 
@@ -242,26 +243,27 @@ WORKSPACE is the workspace the client command was received from."
   (with-lsp-workspace workspace
     (lsp-send-execute-command command)))
 
-(defun lsp-metals--publish-decorations (workspace params)
+(lsp-defun lsp-metals--publish-decorations (workspace (&PublishDecorationsParams :uri :options))
   "Handle the metals/publishDecorations extension notification.
-WORKSPACE is the workspace the notification was received from.
-PARAMS are the notification params."
+WORKSPACE is the workspace the notification was received from."
   (with-lsp-workspace workspace
-    (let* ((file (lsp--uri-to-path (ht-get params "uri")))
+    (let* ((file (lsp--uri-to-path uri))
             (buffer (lsp--buffer-for-file file)))
       (when buffer
         (with-current-buffer buffer
           (lsp--remove-overlays 'metals-decoration)
-          (mapc #'lsp-metals--make-overlay (ht-get params "options")))))))
+          (mapc #'lsp-metals--make-overlay options))))))
 
-(defun lsp-metals--make-overlay (decoration)
-  "Create overlay from metals DECORATION."
-  (let* ((region (lsp--range-to-region (ht-get decoration "range")))
-          (content (ht-get (ht-get (ht-get decoration "renderOptions") "after") "contentText"))
-          (hover (ht-get (ht-get decoration "hoverMessage") "value"))
+(lsp-defun lsp-metals--make-overlay ((&DecorationOptions :range :render-options :hover-message?))
+  "Create overlay from metals decoration."
+  (let* ((region (lsp--range-to-region range))
           (ov (make-overlay (car region) (cdr region) nil t t)))
-    (overlay-put ov 'after-string (propertize content 'cursor t 'font-lock-face 'font-lock-comment-face))
-    (overlay-put ov 'help-echo hover)
+    (-when-let* (((&ThemableDecorationInstanceRenderOption :after?) render-options)
+                  ((&ThemableDecorationAttachmentRenderOptions :content-text?) after?))
+      (overlay-put ov 'after-string (propertize content-text? 'cursor t 'font-lock-face 'font-lock-comment-face)))
+    (when hover-message?
+      (-let (((&MarkupContent :value) hover-message?))
+        (overlay-put ov 'help-echo value)))
     (overlay-put ov 'metals-decoration t)))
 
 (defun lsp-metals--logs-toggle (_workspace)
@@ -276,11 +278,10 @@ PARAMS are the notification params."
         ((and flymake-mode (fboundp 'flymake-show-diagnostics-buffer)) (flymake-show-diagnostics-buffer))
         ((and flycheck-mode (fboundp 'flycheck-list-errors)) (flycheck-list-errors))))
 
-(defun lsp-metals--execute-client-command (workspace params)
+(lsp-defun lsp-metals--execute-client-command (workspace (&ExecuteCommandParams :command :arguments?))
   "Handle the metals/executeClientCommand extension notification.
-WORKSPACE is the workspace the notification was received from.
-PARAMS are the notification params."
-  (when-let ((command (pcase (ht-get params "command")
+WORKSPACE is the workspace the notification was received from."
+  (when-let ((command (pcase command
                         (`"metals-doctor-run" #'lsp-metals--doctor-run)
                         (`"metals-doctor-reload" #'lsp-metals--doctor-reload)
                         (`"metals-logs-toggle" #'lsp-metals--logs-toggle)
@@ -289,7 +290,7 @@ PARAMS are the notification params."
                         (`"metals-echo-command" #'lsp-metals--echo-command)
                         (`"metals-model-refresh" #'lsp-metals--model-refresh)
                         (c (ignore (lsp-warn "Unknown metals client command: %s" c))))))
-    (apply command (append (list workspace) (ht-get params "arguments") nil))))
+    (apply command (append (list workspace) arguments? nil))))
 
 (defvar lsp-metals--current-buffer nil
   "Current buffer used to send `metals/didFocusTextDocument' notification.")
@@ -329,28 +330,26 @@ WORKSPACE is the workspace the notification was received from."
                  (when (bound-and-true-p lsp-lens-mode)
                    (lsp--lens-schedule-refresh t)))))))
 
-(defun lsp-metals--status-string-keymap (workspace command)
+(defun lsp-metals--status-string-keymap (workspace command?)
   "Keymap for `metals/status' notification.
 WORKSPACE is the workspace we received notification from.
 COMMAND is the client command to execute."
-  (when command
+  (when command?
     (-doto (make-sparse-keymap)
       (define-key [mode-line mouse-1]
         (lambda ()
           (interactive)
-          (lsp-metals--execute-client-command workspace (ht ("command" command))))))))
+          (lsp-metals--execute-client-command workspace (lsp-make-execute-command-params :command command?)))))))
 
-(defun lsp-metals--status-string (workspace params)
+(lsp-defun lsp-metals--status-string (workspace (&MetalsStatusParams :text :hide? :tooltip? :command?))
   "Handle `metals/status' notification.
-WORKSPACE is the workspace we received notification from.
-PARAMS are the notification params."
-  (-let (((&hash "text" "hide" "tooltip" "command") params))
-    (if (or hide (s-blank-str? text))
-        (lsp-workspace-status nil workspace)
-      (lsp-workspace-status (propertize text
-                              'help-echo tooltip
-                              'local-map (lsp-metals--status-string-keymap workspace command))
-        workspace))))
+WORKSPACE is the workspace we received notification from."
+  (if (or hide? (s-blank-str? text))
+    (lsp-workspace-status nil workspace)
+    (lsp-workspace-status (propertize text
+                            'help-echo tooltip?
+                            'local-map (lsp-metals--status-string-keymap workspace command?))
+      workspace)))
 
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-stdio-connection 'lsp-metals--server-command)

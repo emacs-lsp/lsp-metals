@@ -54,6 +54,7 @@
 (require 'treemacs)
 (require 'lsp-mode)
 (require 'lsp-treemacs)
+(require 'lsp-metals-protocol)
 
 
 (defcustom lsp-metals-treeview-show-when-views-received nil
@@ -481,9 +482,9 @@ window will be selected and have focus."
     ;; No views are available - show temp message.
     (lsp-metals-treeview--show-waiting-message workspace (lsp-metals-treeview--position slot))))
 
-(defun lsp-metals-treeview--refresh (workspace params)
+(defun lsp-metals-treeview--refresh (workspace nodes)
   "Top level treeview changed, Metals has sent new view definitions.
-Views will be associated with the WORKSPACE, we will ignore the PARAMS sent
+Views will be associated with the WORKSPACE, we will ignore the NODES sent
 by Metals in this case."
   (lsp-metals-treeview--log "Received metals views for workspace %s"
                             (lsp--workspace-root workspace))
@@ -496,10 +497,10 @@ by Metals in this case."
   (let ((state (make-lsp-metals-treeview--data
                 :views (mapcar
                         (lambda (node)
-                          `((:view-id    .  ,(ht-get node "viewId"))
+                          `((:view-id    .  ,(lsp-get node :viewId))
                             (:view-name  .  ,(replace-regexp-in-string "metals" ""
-                                                                       (ht-get node "viewId")))))
-                        (ht-get params "nodes")))))
+                                                                       (lsp-get node :viewId)))))
+                        nodes))))
 
     (lsp-metals-treeview--log-state state)
     (lsp-metals-treeview--set-data workspace state)
@@ -522,10 +523,10 @@ the tree to be displayed, CURRENT-TREEMACS-NODE is the paren to the new
 nodes."
   (let ((parent-path (treemacs-button-get current-treemacs-node :path)))
     (-map (lambda (metals-node)
-            (let ((node-uri (ht-get metals-node "nodeUri")))
+            (-when-let* (((&TreeViewNode :node-uri?) metals-node))
               (ht-set lsp-metals-treeview--treemacs-node-index
-                      node-uri
-                      (append parent-path (list node-uri)))))
+                      node-uri?
+                      (append parent-path (list node-uri?)))))
           metals-nodes)))
 
 (defun lsp-metals-treeview--find-node (node-uri)
@@ -543,17 +544,14 @@ and remove it."
   "Update the treemacs NODE in the treeview associated with WORKSPACE.
 Metals will inform us of updates to individual nodes, here we ensure the
 label is updated to reflect their updated value."
-  (lsp-metals-treeview--log "in lsp-metals-treeview--update-node %s" (ht-get node "nodeUri"))
-   (let* ((treeview-buffer-name (lsp-metals-treeview--buffer-name workspace
-                                                                 (ht-get node "viewId")))
-         (node-uri (ht-get node "nodeUri")))
+  (-when-let* (((&TreeViewNode :view-id :label :node-uri?) node)
+               (treeview-buffer-name (lsp-metals-treeview--buffer-name workspace view-id)))
+    (lsp-metals-treeview--log "in lsp-metals-treeview--update-node %s" node-uri?)
     (with-current-buffer treeview-buffer-name
-      (-if-let (tree-node (lsp-metals-treeview--find-node node-uri))
+      (-if-let (tree-node (lsp-metals-treeview--find-node node-uri?))
           (progn
             ;; replace label in our node attached to the tree node.
-            (ht-set (treemacs-button-get tree-node :node)
-                    "label"
-                    (ht-get node "label"))
+            (lsp:set-tree-view-node-label (treemacs-button-get tree-node :node) label)
 
             ;; Currently the only way to re-render the label of an item is
             ;; for the parent to call render-node on its children. So
@@ -564,37 +562,35 @@ label is updated to reflect their updated value."
         (lsp-metals-treeview--log "Failed to find node in treeview")))))
 
 
-(defun lsp-metals-treeview--changed (workspace params)
-  "The treeview nodes have changed, update our treemacs treeview.
-The treeview is associated with WORKSPACE and the Metals parameters sent via
-PARAMS."
-  (lsp-metals-treeview--log "treeview changed\n%s" (json-encode params))
+(defun lsp-metals-treeview--changed (workspace nodes)
+  "The treeview NODES have changed, update our treemacs treeview.
+The treeview is associated with WORKSPACE."
+  (lsp-metals-treeview--log "treeview changed\n%s" (lsp--json-serialize nodes))
   ;; process list of nodes that have changed
   (mapc (lambda (node)
           (lsp-metals-treeview--update-node workspace node))
-        (ht-get params "nodes")))
+        nodes))
 
-(defun lsp-metals-treeview--views-update-message? (params)
+(defun lsp-metals-treeview--views-update-message? (nodes)
   "Has metals sent us a message indicating the views have been updated?
 When metals updates the views (build/compile) or sends us their initial
-definition it will contain a list with viewIds without any nodeUris.
-PARAMS contains the hashtable of view definitions under the 'nodes' key."
+definition it will contain a list of NODES without any nodeUris."
   (-all? (lambda (node)
-           (and (ht-get node "viewId") (not (ht-get node "nodeUri"))))
-         (append (ht-get params "nodes") nil)))
+           (not (lsp-get node :nodeUri)))
+         (append nodes nil)))
 
-(defun lsp-metals-treeview--did-change (workspace params)
+(lsp-defun lsp-metals-treeview--did-change (workspace (&TreeViewDidChangeParams :nodes))
   "Metals treeview changed notification.
 Nodes that have been changed will be provided within the
 PARAMS message with their viewIds.  WORKSPACE will be the current
 workspace of the project."
   (lsp-metals-treeview--log "In lsp-metals-treeview--did-change %s\n%s"
                             (lsp--workspace-root workspace)
-                            (json-encode params))
+                            (lsp--json-serialize nodes))
 
-  (if (lsp-metals-treeview--views-update-message? params)
-      (lsp-metals-treeview--refresh workspace params)
-    (lsp-metals-treeview--changed workspace params)))
+  (if (lsp-metals-treeview--views-update-message? nodes)
+      (lsp-metals-treeview--refresh workspace nodes)
+    (lsp-metals-treeview--changed workspace nodes)))
 
 
 (defun lsp-metals-treeview--send-treeview-children (view-id &optional node-uri)
@@ -621,7 +617,7 @@ boolean value VISIBLE - t or nil."
     (with-lsp-workspace workspace
         (lsp-request-async "metals/treeViewVisibilityDidChange" params
                            (lambda (response)
-                             (lsp-metals-treeview--log (json-encode response)))
+                             (lsp-metals-treeview--log (lsp--json-serialize response)))
                            :mode 'detached))))
 
 (defun lsp-metals-treeview--send-node-collapse-did-change (workspace view-id node-uri collapsed?)
@@ -640,7 +636,7 @@ COLLAPSED? either t or nil."
       (lsp-request-async "metals/treeViewNodeCollapseDidChange" params
                          (lambda (response)
                            (lsp-metals-treeview--log "metals/treeViewNodeCollapseDidChange response:\n %s"
-                                                     (json-encode response)))
+                                                     (lsp--json-serialize response)))
                          :mode 'detached))))
 
 (defun lsp-metals-treeview--get-children (view-id &optional node-uri)
@@ -651,9 +647,10 @@ level child items will be returned for the view.  Returns a list of nodes
 with values converted from json to hash tables."
   (with-lsp-workspace lsp-metals-treeview--current-workspace
     ;; return nodes element and convert from vector to list.
-    (let* ((current-tree-node (treemacs-node-at-point))
-           (children (append (ht-get (lsp-metals-treeview--send-treeview-children view-id node-uri) "nodes") nil)))
-      (lsp-metals-treeview--log "Children returned:\n%s" (json-encode children))
+    (-let* ((current-tree-node (treemacs-node-at-point))
+            ((&TreeViewChildrenResult :nodes) (lsp-metals-treeview--send-treeview-children view-id node-uri))
+            (children (append nodes nil)))
+      (lsp-metals-treeview--log "Children returned:\n%s" (lsp--json-serialize children))
       (when (and (-non-nil children) current-tree-node)
         (lsp-metals-treeview--cache-add-nodes children current-tree-node))
       children)))
@@ -662,9 +659,9 @@ with values converted from json to hash tables."
   "Retrieve children of the currently selected node in the treeview.
 See LSP-METALS-TREEVIEW--GET-CHILDREN."
   (-when-let* ((tree-node (treemacs-node-at-point))
-               (metals-node (treemacs-button-get tree-node :node)))
-    (lsp-metals-treeview--get-children (ht-get metals-node "viewId")
-                                       (ht-get metals-node "nodeUri"))))
+               (metals-node (treemacs-button-get tree-node :node))
+               ((&TreeViewNode :view-id :node-uri?) metals-node))
+    (lsp-metals-treeview--get-children view-id node-uri?)))
 
 ;;
 ;; UI tree view using treemacs
@@ -677,9 +674,9 @@ node is expanding based on OPEN-FORM? being True.  Check if icon matches
 one of our icons for the Metals theme and if not display a standard +/-
 if this is an expandable node.  If the node isn't expandable for now
 do not show an icon."
-  (-if-let (icon (ht-get metals-node "icon"))
-      (treemacs-get-icon-value icon nil "Metals")
-    (if (ht-get metals-node "collapseState")
+  (-if-let ((&TreeViewNode :icon?) metals-node)
+      (treemacs-get-icon-value icon? nil "Metals")
+    (if (lsp-get metals-node :collapseState)
         (treemacs-get-icon-value
          (if open-form? 'expanded 'collapsed)
          nil
@@ -687,13 +684,6 @@ do not show an icon."
 
       ;; leaf node without an icon
       (treemacs-as-icon "   " 'face 'font-lock-string-face))))
-
-;; to support not showing icons at all - leave for debugging for now
-;; (defun lsp-metals-treeview--without-icons (metals-node)
-;;   "Display treeview without icons - use default +/- for expansion."
-;;   (if (ht-get metals-node "collapseState")
-;;       (treemacs-icon-metals-node-closed)
-;;     nil))
 
 (defun lsp-metals-treeview--send-execute-command (command &optional args)
   "Create and send a 'workspace/executeCommand'.
@@ -705,29 +695,30 @@ command asynchronously rather than the default 'lsp-mode' of synchronous."
                            :arguments args)
                      (lambda (response)
                        (lsp-metals-treeview--log "reply from workspace/executeCommand:\n%s"
-                                                 (json-encode response)))
+                                                 (lsp--json-serialize response)))
                      :mode 'detached))
 
 (defun lsp-metals-treeview--exec-node-action (&rest _)
   "Execute the action associated with the treeview node."
   (-when-let* ((node (treemacs-button-get (treemacs-current-button) :node))
-               (command (ht-get node "command")))
+               ((&TreeViewNode :command?) node)
+               ((&TreeViewCommand :command :arguments?) command?))
     (with-lsp-workspace lsp-metals-treeview--current-workspace
       ;; Seems to be an inconsistency in metals commands defined within the tree.
       ;; some have metals. prefix others do not. See:
       ;;  https://github.com/scalameta/metals/issues/838
       (lsp-metals-treeview--send-execute-command
-       (string-remove-prefix "metals." (ht-get command "command"))
-       (ht-get command "arguments")))))
+       (string-remove-prefix "metals." command)
+       arguments?))))
 
-(defun lsp-metals-treeview--on-node-collapsed (metals-node collapsed?)
+(lsp-defun lsp-metals-treeview--on-node-collapsed ((&TreeViewNode :node-uri?) collapsed?)
   "Send metals/treeViewNodeCollapseDidChange to indicate collapsed/expanded.
-METALS-NODE is a hash table describing the metals node attached to treemacs
-in the :node key - passed as item during render.  COLLAPSED? either t or nil
-dependong on if the node has been collapsed or expanded."
+Metals node is a node attached to treemacs in the :node key - passed as item
+during render.  COLLAPSED? either t or nil dependong on if the node has been
+collapsed or expanded."
   (lsp-metals-treeview--send-node-collapse-did-change lsp-metals-treeview--current-workspace
                                                       lsp-metals-treeview--view-id
-                                                      (ht-get metals-node "nodeUri")
+                                                      node-uri?
                                                       collapsed?))
 
 ;;
@@ -794,12 +785,12 @@ dependong on if the node has been collapsed or expanded."
   :render-action
   (treemacs-render-node
    :icon (lsp-metals-treeview--icon item nil)
-   :label-form (ht-get item "label")
+   :label-form (lsp-get item :label)
    :state treemacs-metals-node-closed-state
    ;;:state (lsp-metals-treeview--state item)
    :face 'font-lock-string-face
-   :key-form (ht-get item "nodeUri")
-   :more-properties (:node item :eldoc (ht-get item "tooltip"))))
+   :key-form (lsp-get item :nodeUri)
+   :more-properties (:node item :eldoc (lsp-get item :tooltip))))
 
 ;;
 ;; Root node of Metals treeview, in the first release this is either the
@@ -816,20 +807,20 @@ dependong on if the node has been collapsed or expanded."
   :render-action
   (treemacs-render-node
    :icon (lsp-metals-treeview--icon item nil)
-   :label-form (ht-get item "label")
+   :label-form (lsp-get item :label)
    :state (lsp-metals-treeview--state item)
    :face 'font-lock-keyword-face
-   :key-form (ht-get item "nodeUri")
-   :more-properties (:node item :eldoc (ht-get item "tooltip")))
+   :key-form (lsp-get item :nodeUri)
+   :more-properties (:node item :eldoc (lsp-get item :tooltip)))
   :top-level-marker t
   :root-label (lsp-metals-treeview--view-name lsp-metals-treeview--view-id)
   :root-face 'font-lock-type-face
   :root-key-form lsp-metals-treeview--root-key)
 
 
-(defun lsp-metals-treeview--state (item)
-  "Return the state of the treeview ITEM."
-  (if (ht-get item "collapseState")
+(lsp-defun lsp-metals-treeview--state ((&TreeViewNode :collapse-state?))
+  "Return the state of the treeview node."
+  (if collapse-state?
       treemacs-metals-node-closed-state
     treemacs-metals-leaf-state))
 
