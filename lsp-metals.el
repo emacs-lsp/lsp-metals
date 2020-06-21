@@ -248,7 +248,7 @@ WORKSPACE is the workspace the client command was received from."
 WORKSPACE is the workspace the notification was received from."
   (with-lsp-workspace workspace
     (let* ((file (lsp--uri-to-path uri))
-            (buffer (lsp--buffer-for-file file)))
+            (buffer (find-buffer-visiting file)))
       (when buffer
         (with-current-buffer buffer
           (lsp--remove-overlays 'metals-decoration)
