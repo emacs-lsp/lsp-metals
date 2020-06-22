@@ -407,12 +407,12 @@ WORKSPACE is the workspace we received notification from."
                                        ("metals-run-session-start" (-partial #'lsp-metals--debug-start t)))
                   :server-id 'metals
                   :initialized-fn (lambda (workspace)
+                                    (lsp-metals--add-focus-hooks)
                                     (with-lsp-workspace workspace
                                       (lsp--set-configuration
                                        (lsp-configuration-section "metals"))))
                   :after-open-fn (lambda ()
-                                   (add-hook 'lsp-on-idle-hook #'lsp-metals--did-focus nil t)
-                                   (lsp-metals--add-focus-hooks))
+                                   (add-hook 'lsp-on-idle-hook #'lsp-metals--did-focus nil t))
                   :completion-in-comments? t))
 
 (provide 'lsp-metals)
