@@ -356,7 +356,7 @@ PARAMS are the action params."
            :request "launch"
            :noDebug no-debug))))
 
-(defun lsp-metals--model-refresh (workspace)
+(defun lsp-metals--model-refresh (workspace _)
   "Handle `metals-model-refresh' notification refreshing lenses.
 WORKSPACE is the workspace the notification was received from."
   (->> workspace
