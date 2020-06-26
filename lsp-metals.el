@@ -337,21 +337,21 @@ FOCUSED if there is a focused frame."
     (setq lsp-metals--current-buffer (current-buffer))
     (lsp-notify "metals/didFocusTextDocument" (lsp--buffer-uri))))
 
-(defun lsp-metals--debug-start (no-debug params)
+(lsp-defun lsp-metals--debug-start (no-debug (&Command :arguments?))
   "Start debug session.
 If NO-DEBUG is true launch the program without enabling debugging.
 PARAMS are the action params."
   (dap-register-debug-provider "scala" #'identity)
-  (-let [session-params (lsp-send-execute-command
-                         "debug-adapter-start"
-                         (gethash "arguments" params))]
+  (-let (((&DebugSession :name :uri) (lsp-send-execute-command
+                                      "debug-adapter-start"
+                                      arguments?)))
     (dap-debug
-     (list :debugServer (-> (gethash "uri" session-params)
+     (list :debugServer (-> uri
                             (split-string ":")
                             cl-third
                             string-to-number)
            :type "scala"
-           :name (gethash "name" session-params)
+           :name name
            :host "localhost"
            :request "launch"
            :noDebug no-debug))))

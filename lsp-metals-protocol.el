@@ -35,6 +35,7 @@
   (DecorationOptions (:range :renderOptions) (:hoverMessage))
   (ThemableDecorationInstanceRenderOption nil (:after))
   (ThemableDecorationAttachmentRenderOptions nil (:contentText :color :fontStyle))
+  (DebugSession (:name :uri) nil)
   (TreeViewNode (:viewId :label) (:nodeUri :command :icon :tooltip :collapseState))
   (TreeViewCommand (:title :command) (:tooltip :arguments))
   (TreeViewChildrenResult (:nodes) nil)
