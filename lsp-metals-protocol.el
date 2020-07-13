@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020 Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "25.2") (lsp-mode "7.0"))
+;; Package-Requires: ((emacs "26.1") (lsp-mode "7.0"))
 ;; Author: Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
 ;; URL: https://github.com/emacs-lsp/lsp-metals
