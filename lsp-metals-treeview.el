@@ -3,7 +3,7 @@
 ;; Copyright (C) 2019 Darren Syzling <dsyzling@gmail.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "25.2") (lsp-mode "6.0") (dash "2.14.1") (dash-functional "2.14.1") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
+;; Package-Requires: ((emacs "25.2") (lsp-mode "7.0") (dash "2.14.1") (dash-functional "2.14.1") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
 ;; Author: Darren Syzling <dsyzling@gmail.com>
 ;;      Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
