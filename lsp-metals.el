@@ -196,6 +196,13 @@ speed up document processing."
   (interactive)
   (lsp-send-execute-command "sources-scan" ()))
 
+(defun lsp-metals-reset-choice ()
+  "Reset a decision you made about different settings.
+E.g. If you choose to import workspace with sbt you can decide to reset and
+change it again."
+  (interactive)
+  (lsp-send-execute-command "reset-choice" ()))
+
 (defun lsp-metals--doctor-render (html)
   "Render the Metals doctor HTML in the current buffer."
   (require 'shr)
