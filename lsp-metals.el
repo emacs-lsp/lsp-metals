@@ -30,6 +30,7 @@
 
 (require 'lsp-mode)
 (require 'dap-mode)
+(require 'lsp-lens)
 (require 'lsp-metals-protocol)
 (require 'lsp-metals-treeview)
 (require 'view)
@@ -371,7 +372,7 @@ WORKSPACE is the workspace the notification was received from."
        (mapc (lambda (buffer)
                (with-current-buffer buffer
                  (when (bound-and-true-p lsp-lens-mode)
-                   (lsp--lens-schedule-refresh t)))))))
+                   (lsp-lens--schedule-refresh t)))))))
 
 (defun lsp-metals--status-string-keymap (workspace command?)
   "Keymap for `metals/status' notification.
