@@ -3,7 +3,7 @@
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "26.1") (lsp-mode "7.0") (dap-mode "0.3") (dash "2.14.1") (dash-functional "2.14.1") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
+;; Package-Requires: ((emacs "26.1") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.14.1") (dash-functional "2.14.1") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>
 ;;      Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
@@ -280,11 +280,7 @@ WORKSPACE is the workspace the notification was received from."
 
 (defun lsp-metals--diagnostics-focus (_workspace)
   "Focus on the window that lists all published diagnostics."
-  (defvar flymake-mode)
-  (defvar flycheck-mode)
-  (cond ((fboundp 'flymake-show-diagnostics-buffer) (flymake-show-diagnostics-buffer))
-        ((and flymake-mode (fboundp 'flymake-show-diagnostics-buffer)) (flymake-show-diagnostics-buffer))
-        ((and flycheck-mode (fboundp 'flycheck-list-errors)) (flycheck-list-errors))))
+  (lsp-treemacs-errors-list))
 
 (lsp-defun lsp-metals--execute-client-command (workspace (&ExecuteCommandParams :command :arguments?))
   "Handle the metals/executeClientCommand extension notification.
