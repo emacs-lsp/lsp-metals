@@ -650,7 +650,7 @@ with values converted from json to hash tables."
     (-let* ((current-tree-node (treemacs-node-at-point))
             ((&TreeViewChildrenResult :nodes) (lsp-metals-treeview--send-treeview-children view-id node-uri))
             (children (append nodes nil)))
-      (lsp-metals-treeview--log "Children returned:\n%s" (lsp--json-serialize children))
+      (lsp-metals-treeview--log "Children returned:\n%s" (lsp--json-serialize nodes))
       (when (and (-non-nil children) current-tree-node)
         (lsp-metals-treeview--cache-add-nodes children current-tree-node))
       children)))
