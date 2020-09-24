@@ -222,6 +222,14 @@ change it again."
   (interactive)
   (lsp-send-execute-command "reset-choice" ()))
 
+(defun lsp-metals-analyze-stacktrace ()
+  "Convert provided stacktrace in the region to a format with links."
+  (interactive)
+  (when (and (use-region-p) default-directory)
+    (with-lsp-workspace (lsp-find-workspace 'metals default-directory)
+      (let ((stacktrace (buffer-substring (region-beginning) (region-end))))
+        (lsp-send-execute-command "metals.analyze-stacktrace" (vector stacktrace))))))
+
 (defun lsp-metals--doctor-render (html)
   "Render the Metals doctor HTML in the current buffer."
   (require 'shr)
@@ -253,7 +261,7 @@ WORKSPACE is the workspace the client command was received from."
     (with-current-buffer buffer
       (lsp-metals--doctor-render html))))
 
-(defun lsp-metals--goto-location (_workspace location)
+(defun lsp-metals--goto-location (_workspace location &optional _)
   "Move the cursor focus to the provided LOCATION."
   (let ((xrefs (lsp--locations-to-xref-items (list location))))
     (if (boundp 'xref-show-definitions-function)
