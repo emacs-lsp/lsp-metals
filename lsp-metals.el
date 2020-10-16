@@ -152,6 +152,18 @@ speed up document processing."
   :group 'lsp-metals
   :package-version '(lsp-mode . "1.0"))
 
+(defcustom lsp-metals-implicit-argument-annotations-enabled nil
+  "If True, implicit argument annotations will be shown."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-mode . "1.0"))
+
+(defcustom lsp-metals-type-annotations-enabled nil
+  "If True, infered type annotations will be shown."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-mode . "1.0"))
+
 (defcustom lsp-metals-remote-language-server ""
   "A URL pointing to a remote language server."
   :type '(string)
@@ -171,6 +183,8 @@ speed up document processing."
    ("metals.bloop-sbt-already-installed" lsp-metals-bloop-sbt-already-installed t)
    ("metals.bloop-version" lsp-metals-bloop-version)
    ("metals.super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled t)
+   ("metals.implicit-argument-annotations-enabled" lsp-metals-implicit-argument-annotations-enabled t)
+   ("metals.type-annotations-enabled" lsp-metals-type-annotations-enabled t)
    ("metals.remote-language-server" lsp-metals-remote-language-server)))
 
 (defun lsp-metals--server-command ()
@@ -396,6 +410,7 @@ WORKSPACE is the workspace we received notification from."
                   :major-modes '(scala-mode)
                   :priority -1
                   :initialization-options '((decorationProvider . t)
+                                            (inlineDecorationProvider . t)
                                             (didFocusProvider . t)
                                             (executeClientCommandProvider . t)
                                             (doctorProvider . "html")
