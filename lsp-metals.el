@@ -152,17 +152,21 @@ speed up document processing."
   :group 'lsp-metals
   :package-version '(lsp-mode . "1.0"))
 
-(defcustom lsp-metals-implicit-argument-annotations-enabled nil
-  "If True, implicit argument annotations will be shown."
+(defcustom lsp-metals-show-implicit-arguments nil
+  "If True, implicit argument annotations will be shown.
+When this option is enabled, each method that has implicit arguments has them
+displayed either as additional decorations."
   :type 'boolean
   :group 'lsp-metals
-  :package-version '(lsp-mode . "1.0"))
+  :package-version '(lsp-mode . "1.2"))
 
-(defcustom lsp-metals-type-annotations-enabled nil
-  "If True, infered type annotations will be shown."
+(defcustom lsp-metals-show-inferred-type nil
+  "If True, inferred type annotations will be shown.
+When this option is enabled, each method that can have inferred types has them
+displayed either as additional decorations."
   :type 'boolean
   :group 'lsp-metals
-  :package-version '(lsp-mode . "1.0"))
+  :package-version '(lsp-mode . "1.2"))
 
 (defcustom lsp-metals-remote-language-server ""
   "A URL pointing to a remote language server."
@@ -183,8 +187,8 @@ speed up document processing."
    ("metals.bloop-sbt-already-installed" lsp-metals-bloop-sbt-already-installed t)
    ("metals.bloop-version" lsp-metals-bloop-version)
    ("metals.super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled t)
-   ("metals.implicit-argument-annotations-enabled" lsp-metals-implicit-argument-annotations-enabled t)
-   ("metals.type-annotations-enabled" lsp-metals-type-annotations-enabled t)
+   ("metals.show-implicit-arguments" lsp-metals-show-implicit-arguments t)
+   ("metals.show-inferred-type" lsp-metals-show-inferred-type t)
    ("metals.remote-language-server" lsp-metals-remote-language-server)))
 
 (defun lsp-metals--server-command ()
