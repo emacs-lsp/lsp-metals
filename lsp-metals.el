@@ -269,6 +269,16 @@ WORKSPACE is the workspace the client command was received from."
   (with-lsp-workspace workspace
     (lsp-send-execute-command command)))
 
+(defun lsp-metals-bsp-switch ()
+  "Interactively switch between BSP servers."
+  (interactive)
+  (lsp-send-execute-command "bsp-switch" ()))
+
+(defun lsp-metals-generate-bsp-config ()
+  "Generate a Scala BSP Config based on the current BSP server."
+  (interactive)
+  (lsp-send-execute-command "generate-bsp-config" ()))
+
 (lsp-defun lsp-metals--publish-decorations (workspace (&PublishDecorationsParams :uri :options))
   "Handle the metals/publishDecorations extension notification.
 WORKSPACE is the workspace the notification was received from."
