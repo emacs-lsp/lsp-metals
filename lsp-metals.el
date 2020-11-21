@@ -3,7 +3,7 @@
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "27.1") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.14.1") (dash-functional "2.14.1") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
+;; Package-Requires: ((emacs "26.1") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.14.1") (dash-functional "2.14.1") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>
 ;;      Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
@@ -344,7 +344,7 @@ FOCUSED if there is a focused frame."
       `(progn
          (defun lsp-metals--handle-focus-change ()
            "Send `metals/windowStateDidChange' notification on frames focus change."
-           (let ((focused (if (frame-focus-state) t :json-false)))
+           (let ((focused (if (and (fboundp 'frame-focus-state) (frame-focus-state)) t :json-false)))
              (--each (lsp-metals--workspaces)
                (with-lsp-workspace it
                  (lsp-metals--window-state-did-change focused)))))
