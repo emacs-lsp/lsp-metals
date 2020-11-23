@@ -344,7 +344,7 @@ FOCUSED if there is a focused frame."
       `(progn
          (defun lsp-metals--handle-focus-change ()
            "Send `metals/windowStateDidChange' notification on frames focus change."
-           (let ((focused (if (frame-focus-state) t :json-false)))
+           (let ((focused (if (and (fboundp 'frame-focus-state) (frame-focus-state)) t :json-false)))
              (--each (lsp-metals--workspaces)
                (with-lsp-workspace it
                  (lsp-metals--window-state-did-change focused)))))
