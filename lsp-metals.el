@@ -160,6 +160,14 @@ displayed either as additional decorations."
   :group 'lsp-metals
   :package-version '(lsp-mode . "1.2"))
 
+(defcustom lsp-metals-show-implicit-conversions-and-classes nil
+  "If True, implicit conversions and classes will be shown.
+When this option is enabled, each place where an implicit method or class is
+used has it displayed either as additional decorations."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-mode . "1.2"))
+
 (defcustom lsp-metals-show-inferred-type nil
   "If True, inferred type annotations will be shown.
 When this option is enabled, each method that can have inferred types has them
@@ -188,6 +196,7 @@ displayed either as additional decorations."
    ("metals.bloop-version" lsp-metals-bloop-version)
    ("metals.super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled t)
    ("metals.show-implicit-arguments" lsp-metals-show-implicit-arguments t)
+   ("metals.show-implicit-conversions-and-classes" lsp-metals-show-implicit-conversions-and-classes t)
    ("metals.show-inferred-type" lsp-metals-show-inferred-type t)
    ("metals.remote-language-server" lsp-metals-remote-language-server)))
 
