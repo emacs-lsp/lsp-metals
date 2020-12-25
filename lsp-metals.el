@@ -231,6 +231,14 @@ change it again."
   (interactive)
   (lsp-send-execute-command "reset-choice" ()))
 
+(defun lsp-metals-copy-worksheet-output ()
+  "Copy worksheet with evaluated results as comments."
+  (interactive)
+  (let ((command-result (lsp-send-execute-command "metals.copy-worksheet-output" (lsp--buffer-uri))))
+    (when-let ((value (lsp-get command-result :value)))
+      (kill-new value)
+      (message "Copied worksheet output."))))
+
 (defun lsp-metals-analyze-stacktrace ()
   "Convert provided stacktrace in the region to a format with links."
   (interactive)
