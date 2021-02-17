@@ -5,7 +5,7 @@
 ;; Version: 1.0.0
 ;; Package-Requires: ((emacs "26.1") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.18.0") (f "0.20.0") (ht "2.0") (treemacs "2.5"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>
-;;      Evgeny Kurnevsky <kurnevsky@gmail.com>
+;;         Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
 ;; URL: https://github.com/emacs-lsp/lsp-metals
 
