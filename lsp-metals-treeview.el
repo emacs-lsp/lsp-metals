@@ -314,7 +314,7 @@ then show the window."
                   nil)))
     (when (or (eq 'hidden visibility) (eq 'none visibility))
       (lsp-metals-treeview--show-views workspace
-                                     views 0 select-window?))))
+                                     views 1 select-window?))))
 
 (defun lsp-metals-treeview--delete-window (&optional workspace workspace-shutdown?)
   "Delete the metals treeview window associated with the WORKSPACE.
@@ -457,7 +457,7 @@ Select the first view/buffer in the treeview window."
   "Display each view returned by Metals in our sidebar treeview window.
 Views are displayed for this WORKSPACE, VIEWS is a list of alist containing
 the views taken from the lsp-metals-treeview--data structure.  SLOT is a
-numeric position starting from 0 where the treeview will be positioned
+numeric position starting from 1 where the treeview will be positioned
 relative to the others.  when SELECT-TREEVIEW-WINDOW is 't' the treeview
 window will be selected and have focus."
   (if (not (null views))
@@ -512,7 +512,7 @@ by Metals in this case."
               (lsp-metals-treeview--exists? workspace))
       (lsp-metals-treeview--show-views workspace
                                      (and state (lsp-metals-treeview--data-views state))
-                                     0))))
+                                     1))))
 
 
 (defun lsp-metals-treeview--cache-add-nodes (metals-nodes current-treemacs-node)
