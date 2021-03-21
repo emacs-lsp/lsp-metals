@@ -473,6 +473,26 @@ WORKSPACE is the workspace we received notification from."
                                    (add-hook 'lsp-on-idle-hook #'lsp-metals--did-focus nil t))
                   :completion-in-comments? t))
 
+(defmacro lsp-metals--create-bool-toggle (name config var)
+  "Create a toggle for lsp-metal config.
+NAME is a user-facing name used for the interactive command.  CONFIG is the LSP
+configuration name.  VAR is the variable holding the value of the configuration."
+  (let ((func-name (intern (format "lsp-metals-toggle-%s" name))))
+    `(defun ,func-name ()
+       ,(format "Toggle LSP metals %s config" name)
+      (interactive)
+      (setq ,var (not ,var))
+      (lsp-register-custom-settings '((,(format "metals.%s" config) ,var t)))
+      (with-lsp-workspaces (lsp-metals--workspaces)
+        (lsp--set-configuration (lsp-configuration-section "metals")))
+      (let ((status (if ,var "on" "off")))
+        (lsp--info "Turned %s %s" status ,name)))))
+
+(lsp-metals--create-bool-toggle "show-inferred-type" "show-inferred-type" lsp-metals-show-inferred-type)
+(lsp-metals--create-bool-toggle "show-implicit-arguments" "show-implicit-arguments" lsp-metals-show-implicit-arguments)
+(lsp-metals--create-bool-toggle "show-super-method-lenses" "super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled)
+(lsp-metals--create-bool-toggle "show-implicit-conversions" "show-implicit-conversions-and-classes" lsp-metals-show-implicit-conversions-and-classes)
+
 (provide 'lsp-metals)
 ;;; lsp-metals.el ends here
 
