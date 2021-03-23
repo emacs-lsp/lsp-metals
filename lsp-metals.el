@@ -483,7 +483,8 @@ configuration name.  VAR is the variable holding the value of the configuration.
       (interactive)
       (setq ,var (not ,var))
       (lsp-register-custom-settings '((,(format "metals.%s" config) ,var t)))
-      (lsp--set-configuration (lsp-configuration-section "metals"))
+      (with-lsp-workspaces (lsp-metals--workspaces)
+        (lsp--set-configuration (lsp-configuration-section "metals")))
       (let ((status (if ,var "on" "off")))
         (lsp--info "Turned %s %s" status ,name)))))
 
