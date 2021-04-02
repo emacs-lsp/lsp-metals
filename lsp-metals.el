@@ -247,6 +247,13 @@ change it again."
       (let ((stacktrace (buffer-substring (region-beginning) (region-end))))
         (lsp-send-execute-command "metals.analyze-stacktrace" (vector stacktrace))))))
 
+(defun lsp-metals-super-method-hierarchy ()
+  "Calculate inheritance hierarchy of a class that should contain given method."
+  (interactive)
+  (lsp-send-execute-command
+   "super-method-hierarchy"
+   `(:document ,(lsp--buffer-uri) :position ,(lsp-point-to-position (point)))))
+
 (defun lsp-metals--doctor-render (html)
   "Render the Metals doctor HTML in the current buffer."
   (require 'shr)
