@@ -82,8 +82,8 @@ different workspaces."
   (buffers nil))
 
 (defvar-local lsp-metals-treeview--current-workspace nil
-  "Associate lsp workspace with the metals treeview buffer so we can
-invoke async calls to the lsp server.")
+  "Associate lsp workspace with the metals treeview buffer.
+Needed to make async calls to the lsp server from treemacs buffers.")
 
 (defvar-local lsp-metals-treeview--view-id nil
   "Metals treeview id associated with the treeview buffer.")
@@ -363,7 +363,8 @@ the context of the window closing."
     m)
   "Keymap for 'lsp-metals-treeview-mode'.")
 
-(define-minor-mode lsp-metals-treeview-mode "LSP Metals Treeview minor mode"
+(define-minor-mode lsp-metals-treeview-mode
+  "LSP Metals Treeview minor mode."
   nil nil nil
   :keymap lsp-metals-treeview-mode-map
   :group 'lsp-metals-treeview)
