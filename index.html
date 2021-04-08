@@ -209,9 +209,38 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Home
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
     <a href="." class="md-nav__link md-nav__link--active">
       Home
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -289,6 +318,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -309,6 +353,17 @@
 <p><a href="https://github.com/emacs-lsp/lsp-metals/actions"><img alt="CI" src="https://github.com/emacs-lsp/lsp-metals/workflows/CI/badge.svg" /></a>
 <a href="https://gitter.im/emacs-lsp/lsp-mode"><img alt="Gitter" src="https://badges.gitter.im/emacs-lsp/lsp-mode.svg" /></a></p>
 <p>Emacs Scala IDE using <a href="https://github.com/emacs-lsp/lsp-mode">lsp-mode</a> to connect to <a href="https://scalameta.org/metals">Metals</a>.</p>
+<h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">#</a></h2>
+<p>An example to setup <code>lsp-metals</code> using <code>use-package</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">use-package</span> <span class="nv">lsp-metals</span>
+  <span class="nb">:ensure</span> <span class="no">t</span>
+  <span class="nb">:custom</span>
+  <span class="c1">;; Metals claims to support range formatting by default but it supports range</span>
+  <span class="c1">;; formatting of multiline strings only. You might want to disable it so that</span>
+  <span class="c1">;; emacs can use indentation provided by scala-mode.</span>
+  <span class="p">(</span><span class="nv">lsp-metals-server-args</span> <span class="o">&#39;</span><span class="p">(</span><span class="s">&quot;-J-Dmetals.allow-multiline-string-formatting=off&quot;</span><span class="p">))</span>
+  <span class="nb">:hook</span> <span class="p">(</span><span class="nv">scala-mode</span> <span class="o">.</span> <span class="nv">lsp</span><span class="p">))</span>
+</code></pre></div>
                 
                   
                     
@@ -317,7 +372,7 @@
 <div class="md-source-date">
   <small>
     
-      Last update: <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 7, 2021</span>
+      Last update: <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 8, 2021</span>
     
   </small>
 </div>
