@@ -490,11 +490,6 @@ by Metals in this case."
   (lsp-metals-treeview--log "Received metals views for workspace %s"
                             (lsp--workspace-root workspace))
 
-  ;; Close any current treeview window for this workspace, so we can
-  ;; recreate it.
-  (when (lsp-metals-treeview--exists? workspace)
-    (lsp-metals-treeview--delete-window workspace))
-
   (let ((state (make-lsp-metals-treeview--data
                 :views (mapcar
                         (lambda (node)
@@ -511,6 +506,10 @@ by Metals in this case."
     ;; if we receive this message.
     (when (or lsp-metals-treeview-show-when-views-received
               (lsp-metals-treeview--exists? workspace))
+      ;; Close any current treeview window for this workspace, so we can
+      ;; recreate it.
+      (when (lsp-metals-treeview--exists? workspace)
+        (lsp-metals-treeview--delete-window workspace))
       (lsp-metals-treeview--show-views workspace
                                      (and state (lsp-metals-treeview--data-views state))
                                      0))))
