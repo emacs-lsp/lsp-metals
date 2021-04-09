@@ -844,11 +844,11 @@ the current buffer."
     (-when-let* ((workspace (lsp-find-workspace lsp-metals-treeview--metals-server-id (buffer-file-name)))
                  (treeview-buffer-name (lsp-metals-treeview--buffer-name workspace view-id)))
       (with-current-buffer treeview-buffer-name
-        (--each-r uri-chain
-          (-when-let (btn (lsp-metals-treeview--find-node it))
-            (goto-char (marker-position btn))
-            (unless (treemacs-is-node-expanded? btn)
-              (funcall (alist-get (treemacs-button-get btn :state) treemacs-TAB-actions-config)))))
+        (mapc (lambda (uri)
+                (-when-let (tree-node (lsp-metals-treeview--find-node uri))
+                  (goto-char (marker-position tree-node))
+                  (treemacs-update-node (treemacs-button-get tree-node :path) t)))
+              (reverse uri-chain))
         (-when-let (buffer-window (get-buffer-window))
           (set-window-point buffer-window (point))
           (select-window buffer-window))))))
