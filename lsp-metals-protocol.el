@@ -39,7 +39,8 @@
   (TreeViewNode (:viewId :label) (:nodeUri :command :icon :tooltip :collapseState))
   (TreeViewCommand (:title :command) (:tooltip :arguments))
   (TreeViewChildrenResult (:nodes) nil)
-  (TreeViewDidChangeParams (:nodes) nil))
+  (TreeViewDidChangeParams (:nodes) nil)
+  (TreeViewRevealResult (:viewId :uriChain) nil))
 
 (provide 'lsp-metals-protocol)
 ;;; lsp-metals-protocol.el ends here

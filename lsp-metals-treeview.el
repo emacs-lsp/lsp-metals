@@ -837,6 +837,22 @@ the current buffer."
       (lsp-metals-treeview--show-window workspace t)
     (message "Current buffer is not within Metals workspace")))
 
+(defun lsp-metals-treeview-reveal ()
+  "Find the current buffer file in the treeview."
+  (interactive)
+  (-let (((&TreeViewRevealResult :view-id :uri-chain) (lsp-request "metals/treeViewReveal" (lsp--text-document-position-params))))
+    (-when-let* ((workspace (lsp-find-workspace lsp-metals-treeview--metals-server-id (buffer-file-name)))
+                 (treeview-buffer-name (lsp-metals-treeview--buffer-name workspace view-id)))
+      (with-current-buffer treeview-buffer-name
+        (--each-r uri-chain
+          (-when-let (btn (lsp-metals-treeview--find-node it))
+            (goto-char (marker-position btn))
+            (unless (treemacs-is-node-expanded? btn)
+              (funcall (alist-get (treemacs-button-get btn :state) treemacs-TAB-actions-config)))))
+        (-when-let (buffer-window (get-buffer-window))
+          (set-window-point buffer-window (point))
+          (select-window buffer-window))))))
+
 
 ;; Debug helpers to track down issues with treemacs and aid development.
 (defun lsp-metals-treeview--debug-node ()
