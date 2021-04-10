@@ -70,14 +70,13 @@ different workspaces."
   :group 'lsp-metals-treeview
   :type 'float)
 
-(defcustom lsp-metals-treeview-views '(((:view-id . "metalsPackages") (:view-name . "Packages"))
-                                       ((:view-id . "metalsBuild") (:view-name . "Build"))
-                                       ((:view-id . "metalsCompile") (:view-name . "Compile"))
-                                       ((:view-id . "metalsHelp") (:view-name . "Help")))
+(defcustom lsp-metals-treeview-views '("metalsPackages"
+                                       "metalsBuild"
+                                       "metalsCompile"
+                                       "metalsHelp")
   "List of views to display."
   :group 'lsp-metals-treeview
-  :type '(repeat (alist :key-type (symbol :tag "Key")
-                        :value-type (string :tag "Value")))
+  :type '(repeat string)
   :package-version '(lsp-metals . "1.2"))
 
 (defcustom lsp-metals-treeview-theme 'Metals-light
@@ -403,11 +402,11 @@ view information."
   "Recursive function to display each view in VIEWS.
 The views will be associated with the WORKSPACE and displayed in the side
 window based based on an increasing SLOT number position."
-  (when-let ((view (car views)))
+  (when-let ((view-id (car views)))
     (lsp-metals-treeview--show-view workspace
-                           (alist-get :view-id view)
+                           view-id
                            (lsp-metals-treeview--position slot))
-    (lsp-metals-treeview--send-visibility-did-change workspace (alist-get :view-id view) t)
+    (lsp-metals-treeview--send-visibility-did-change workspace view-id t)
     (lsp-metals-treeview--display-views workspace (cdr views) (+ 1 slot))))
 
 (defun lsp-metals-treeview--select-window (workspace)
