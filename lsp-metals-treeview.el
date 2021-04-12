@@ -220,16 +220,6 @@ the message and parameters."
           (file-name-nondirectory
            (directory-file-name (lsp--workspace-root workspace)))))
 
-(defun lsp-metals-treeview--waiting-message-buffer-name (workspace)
-  "Return the name of a temporary buffer awaiting information from Metals.
-We display a message informing the user that Metals has not sent any treeview
-information for this WORKSPACE.  When the views arrive this buffer will be
-removed and replaced with the treeviews."
-  (format "%s %s*"
-          lsp-metals-treeview--buffer-prefix
-          (file-name-nondirectory
-           (directory-file-name (lsp--workspace-root workspace)))))
-
 (defun lsp-metals-treeview--hide-window (&optional workspace)
   "Hide the Metals treeview window associated with the WORKSPACE.
 The window will be deleted but the treeview buffers will still
@@ -393,12 +383,6 @@ form '((side left))."
             (treemacs-expand-metals-root)))))))
 
 
-(defun lsp-metals-treeview--get-waiting-message-buffer (workspace)
-  "Return the temporary 'waiting' buffer associated with the WORKSPACE.
-The temporary buffer will be visible while we wait for Metals to send us
-view information."
-  (get-buffer (lsp-metals-treeview--waiting-message-buffer-name workspace)))
-
 (defun lsp-metals-treeview--display-views (workspace views slot)
   "Recursive function to display each view in VIEWS.
 The views will be associated with the WORKSPACE and displayed in the side
@@ -423,9 +407,6 @@ from 0 where the treeview will be positioned relative to the others.  when
 SELECT-TREEVIEW-WINDOW is 't' the treeview window will be selected and have
 focus."
   (lsp-metals-treeview--display-views workspace lsp-metals-treeview-views slot)
-
-  (-when-let (buffer (lsp-metals-treeview--get-waiting-message-buffer workspace))
-    (kill-buffer buffer))
 
   (when select-treeview-window
     (lsp-metals-treeview--select-window workspace))
