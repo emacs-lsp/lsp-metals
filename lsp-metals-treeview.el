@@ -645,7 +645,8 @@ command asynchronously rather than the default 'lsp-mode' of synchronous."
                ((&TreeViewCommand :command :arguments?) command?))
     (with-lsp-workspace lsp-metals-treeview--current-workspace
       (pcase command
-        (`"metals-echo-command" (lsp-send-execute-command (seq-first arguments?)))
+        ;; TODO: use `seq-first' after switching to emacs 27.
+        (`"metals-echo-command" (lsp-send-execute-command (seq-elt arguments? 0)))
         (`"metals.goto" (lsp-send-execute-command "goto" arguments?))
         (`"build-connect" (lsp-send-execute-command "build-connect"))
         (`"build-import" (lsp-send-execute-command "build-import"))
