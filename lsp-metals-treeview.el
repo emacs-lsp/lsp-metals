@@ -587,17 +587,13 @@ command asynchronously rather than the default 'lsp-mode' of synchronous."
   "Execute the action associated with the treeview node."
   (-when-let* ((node (treemacs-button-get (treemacs-current-button) :node))
                ((&TreeViewNode :command?) node)
-               ((&TreeViewCommand :command :arguments?) command?))
+               ((&TreeViewCommand :command) command?))
     (with-lsp-workspace lsp-metals-treeview--current-workspace
       (pcase command
         ;; TODO: use `seq-first' after switching to emacs 27.
-        (`"metals-echo-command" (lsp-send-execute-command (seq-elt arguments? 0)))
-        (`"metals.goto" (lsp-send-execute-command "goto" arguments?))
-        (`"build-connect" (lsp-send-execute-command "build-connect"))
-        (`"build-import" (lsp-send-execute-command "build-import"))
-        (`"compile-cascade" (lsp-send-execute-command "compile-cascade"))
-        (`"compile-cancel" (lsp-send-execute-command "compile-cancel"))
-        (c (lsp-warn "Unknown metals treeview command: %s" c))))))
+        (`"metals-echo-command" (lsp-metals-treeview--send-execute-command (seq-elt (lsp-get command? :arguments) 0)))
+        (`"metals.goto" (lsp-metals-treeview--send-execute-command "goto" (lsp-get command? :arguments)))
+        (c (lsp-metals-treeview--send-execute-command c))))))
 
 (lsp-defun lsp-metals-treeview--on-node-collapsed ((&TreeViewNode :node-uri?) collapsed?)
   "Send metals/treeViewNodeCollapseDidChange to indicate collapsed/expanded.
