@@ -50,6 +50,7 @@
 (require 'json)
 (require 'dash)
 (require 'f)
+(require 'seq)
 (require 'pcase)
 (require 'treemacs)
 (require 'lsp-mode)
