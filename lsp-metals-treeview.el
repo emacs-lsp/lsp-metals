@@ -643,12 +643,14 @@ command asynchronously rather than the default 'lsp-mode' of synchronous."
                ((&TreeViewNode :command?) node)
                ((&TreeViewCommand :command :arguments?) command?))
     (with-lsp-workspace lsp-metals-treeview--current-workspace
-      ;; Seems to be an inconsistency in metals commands defined within the tree.
-      ;; some have metals. prefix others do not. See:
-      ;;  https://github.com/scalameta/metals/issues/838
-      (lsp-metals-treeview--send-execute-command
-       (string-remove-prefix "metals." command)
-       arguments?))))
+      (pcase command
+        (`"metals-echo-command" (lsp-send-execute-command (seq-first arguments?)))
+        (`"metals.goto" (lsp-send-execute-command "goto" arguments?))
+        (`"build-connect" (lsp-send-execute-command "build-connect"))
+        (`"build-import" (lsp-send-execute-command "build-import"))
+        (`"compile-cascade" (lsp-send-execute-command "compile-cascade"))
+        (`"compile-cancel" (lsp-send-execute-command "compile-cancel"))
+        (c (lsp-warn "Unknown metals treeview command: %s" c))))))
 
 (lsp-defun lsp-metals-treeview--on-node-collapsed ((&TreeViewNode :node-uri?) collapsed?)
   "Send metals/treeViewNodeCollapseDidChange to indicate collapsed/expanded.
