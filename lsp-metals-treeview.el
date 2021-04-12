@@ -439,20 +439,6 @@ focus."
   ;; Add hook to close our treeview when the workspace is shutdown.
   (add-hook 'lsp-after-uninitialized-hook #'lsp-metals-treeview--on-workspace-shutdown))
 
-(defun lsp-metals-treeview--refresh (workspace nodes)
-  "Top level treeview changed, Metals has sent new view definitions.
-Views will be associated with the WORKSPACE, we will ignore the NODES sent
-by Metals in this case."
-  (lsp-metals-treeview--log "Received metals views for workspace %s"
-                            (lsp--workspace-root workspace))
-
-  (mapc (lambda (node)
-          (-when-let* (((&TreeViewNode :view-id) node)
-                       (buffer (lsp-metals-treeview--get-buffer-by-id workspace view-id)))
-            (with-current-buffer buffer
-              (treemacs-update-node `(:custom ,lsp-metals-treeview--root-key) t))))
-        nodes))
-
 
 (defun lsp-metals-treeview--cache-add-nodes (metals-nodes current-treemacs-node)
   "Build an index of treemacs nodes nodeUri -> treemacs path.
@@ -479,44 +465,6 @@ and remove it."
     (ht-remove lsp-metals-treeview--treemacs-node-index node-uri)
     nil))
 
-(defun lsp-metals-treeview--update-node (workspace node)
-  "Update the treemacs NODE in the treeview associated with WORKSPACE.
-Metals will inform us of updates to individual nodes, here we ensure the
-label is updated to reflect their updated value."
-  (-when-let* (((&TreeViewNode :view-id :label :node-uri?) node)
-               (treeview-buffer-name (lsp-metals-treeview--buffer-name workspace view-id)))
-    (lsp-metals-treeview--log "in lsp-metals-treeview--update-node %s" node-uri?)
-    (with-current-buffer treeview-buffer-name
-      (-if-let (tree-node (lsp-metals-treeview--find-node node-uri?))
-          (progn
-            ;; replace label in our node attached to the tree node.
-            (lsp:set-tree-view-node-label (treemacs-button-get tree-node :node) label)
-
-            ;; Currently the only way to re-render the label of an item is
-            ;; for the parent to call render-node on its children. So
-            ;; we update the parent of the node we're changing.
-            ;; An enhancement to treemacs is in the works where  the label
-            ;; can be updated directly.
-            (treemacs-update-node (treemacs-button-get tree-node :parent) nil))
-        (lsp-metals-treeview--log "Failed to find node in treeview")))))
-
-
-(defun lsp-metals-treeview--changed (workspace nodes)
-  "The treeview NODES have changed, update our treemacs treeview.
-The treeview is associated with WORKSPACE."
-  (lsp-metals-treeview--log "treeview changed\n%s" (lsp--json-serialize nodes))
-  ;; process list of nodes that have changed
-  (mapc (lambda (node)
-          (lsp-metals-treeview--update-node workspace node))
-        nodes))
-
-(defun lsp-metals-treeview--views-update-message? (nodes)
-  "Has metals sent us a message indicating the views have been updated?
-When metals updates the views (build/compile) or sends us their initial
-definition it will contain a list of NODES without any nodeUris."
-  (-all? (lambda (node)
-           (not (lsp-get node :nodeUri)))
-         (append nodes nil)))
 
 (lsp-defun lsp-metals-treeview--did-change (workspace (&TreeViewDidChangeParams :nodes))
   "Metals treeview changed notification.
@@ -527,9 +475,25 @@ workspace of the project."
                             (lsp--workspace-root workspace)
                             (lsp--json-serialize nodes))
 
-  (if (lsp-metals-treeview--views-update-message? nodes)
-      (lsp-metals-treeview--refresh workspace nodes)
-    (lsp-metals-treeview--changed workspace nodes)))
+  (mapc (lambda (node)
+          (-when-let* (((&TreeViewNode :view-id :label) node)
+                       (buffer (lsp-metals-treeview--get-buffer-by-id workspace view-id)))
+            (with-current-buffer buffer
+              (-if-let ((&TreeViewNode :node-uri?) node)
+                  (-if-let (tree-node (lsp-metals-treeview--find-node node-uri?))
+                      (progn
+                        ;; replace label in our node attached to the tree node.
+                        (lsp:set-tree-view-node-label (treemacs-button-get tree-node :node) label)
+
+                        ;; Currently the only way to re-render the label of an item is
+                        ;; for the parent to call render-node on its children. So
+                        ;; we update the parent of the node we're changing.
+                        ;; An enhancement to treemacs is in the works where  the label
+                        ;; can be updated directly.
+                        (treemacs-update-node (treemacs-button-get tree-node :parent) nil))
+                    (lsp-metals-treeview--log "Failed to find node in treeview"))
+                (treemacs-update-node `(:custom ,lsp-metals-treeview--root-key) t)))))
+        nodes))
 
 
 (defun lsp-metals-treeview--send-treeview-children (view-id &optional node-uri)
