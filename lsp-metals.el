@@ -207,12 +207,12 @@ displayed either as additional decorations."
 (defun lsp-metals-build-import ()
   "Unconditionally run `sbt bloopInstall` and re-connect to the build server."
   (interactive)
-  (lsp-send-execute-command "build-import" ()))
+  (lsp-metals-treeview--send-execute-command-async "build-import" ()))
 
 (defun lsp-metals-build-connect ()
   "Unconditionally cancel existing build server connection and re-connect."
   (interactive)
-  (lsp-send-execute-command "build-connect" ()))
+  (lsp-metals-treeview--send-execute-command-async "build-connect" ()))
 
 (defun lsp-metals-doctor-run ()
   "Open the Metals doctor to troubleshoot potential build problems."
@@ -222,7 +222,7 @@ displayed either as additional decorations."
 (defun lsp-metals-sources-scan ()
   "Walk all files in the workspace and index where symbols are defined."
   (interactive)
-  (lsp-send-execute-command "sources-scan" ()))
+  (lsp-metals-treeview--send-execute-command-async "sources-scan" ()))
 
 (defun lsp-metals-reset-choice ()
   "Reset a decision you made about different settings.

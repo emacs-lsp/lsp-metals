@@ -570,17 +570,14 @@ do not show an icon."
       ;; leaf node without an icon
       (treemacs-as-icon "   " 'face 'font-lock-string-face))))
 
-(defun lsp-metals-treeview--send-execute-command (command &optional args)
+(defun lsp-metals-treeview--send-execute-command-async (command &optional args)
   "Create and send a 'workspace/executeCommand'.
 The message will contain the COMMAND and optional ARGS.  Send the
 command asynchronously rather than the default 'lsp-mode' of synchronous."
-  ;; Current lsp-send-execute-command is synchronous - use our own async call.
   (lsp-request-async "workspace/executeCommand"
                      (list :command command
                            :arguments args)
-                     (lambda (response)
-                       (lsp-metals-treeview--log "reply from workspace/executeCommand:\n%s"
-                                                 (lsp--json-serialize response)))
+                     #'ignore
                      :mode 'detached))
 
 (defun lsp-metals-treeview--exec-node-action (&rest _)
@@ -591,9 +588,8 @@ command asynchronously rather than the default 'lsp-mode' of synchronous."
     (with-lsp-workspace lsp-metals-treeview--current-workspace
       (pcase command
         ;; TODO: use `seq-first' after switching to emacs 27.
-        (`"metals-echo-command" (lsp-metals-treeview--send-execute-command (seq-elt (lsp-get command? :arguments) 0)))
-        (`"metals.goto" (lsp-metals-treeview--send-execute-command "goto" (lsp-get command? :arguments)))
-        (c (lsp-metals-treeview--send-execute-command c))))))
+        (`"metals-echo-command" (lsp-metals-treeview--send-execute-command-async (seq-elt (lsp-get command? :arguments) 0)))
+        (c (lsp-metals-treeview--send-execute-command-async c (lsp-get command? :arguments)))))))
 
 (lsp-defun lsp-metals-treeview--on-node-collapsed ((&TreeViewNode :node-uri?) collapsed?)
   "Send metals/treeViewNodeCollapseDidChange to indicate collapsed/expanded.
