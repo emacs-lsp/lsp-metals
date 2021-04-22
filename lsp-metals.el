@@ -41,7 +41,7 @@
   :link '(url-link "https://scalameta.org/metals")
   :package-version '(lsp-metals . "1.0"))
 
-(defcustom lsp-metals-server-command "metals-emacs"
+(defcustom lsp-metals-server-command "metals"
   "The command to launch the Scala language server."
   :group 'lsp-metals
   :type 'file
@@ -52,6 +52,51 @@
   :group 'lsp-metals
   :type '(repeat string)
   :package-version '(lsp-metals . "1.0"))
+
+(defcustom lsp-metals-server-install-dir
+  (f-join lsp-server-install-dir "metals/")
+  "Installation directory for Metals server."
+  :group 'lsp-metals
+  :type 'directory
+  :package-version '(lsp-metals . "1.2"))
+
+(defcustom lsp-metals-coursier-store-path
+  (f-join lsp-metals-server-install-dir "coursier")
+  "The path where Coursier will be stored."
+  :group 'lsp-metals
+  :type 'file
+  :package-version '(lsp-metals . "1.2"))
+
+(defcustom lsp-metals-metals-store-path
+  (f-join lsp-metals-server-install-dir "metals")
+  "The path where Metals will be stored."
+  :group 'lsp-metals
+  :type 'file
+  :package-version '(lsp-metals . "1.2"))
+
+(defcustom lsp-metals-coursier-download-url
+  (pcase system-type
+    (`windows-nt "https://git.io/coursier-cli-windows-exe")
+    (_ "https://git.io/coursier-cli"))
+  "Download url for coursier."
+  :group 'lsp-metals
+  :type 'string
+  :package-version '(lsp-metals . "1.2"))
+
+(defcustom lsp-metals-coursier-asc-url
+  (pcase system-type
+    (`windows-nt "https://raw.githubusercontent.com/coursier/launchers/master/cs-x86_64-pc-win32.exe.asc")
+    (_ "https://raw.githubusercontent.com/coursier/launchers/master/coursier.asc"))
+  "ASC signature url for coursier."
+  :group 'lsp-metals
+  :type 'string
+  :package-version '(lsp-metals . "1.2"))
+
+(defcustom lsp-metals-install-version "latest.release"
+  "Metals version to install."
+  :group 'lsp-metals
+  :type 'string
+  :package-version '(lsp-metals . "1.2"))
 
 (defcustom lsp-metals-java-home ""
   "The Java Home directory.
@@ -200,9 +245,87 @@ displayed either as additional decorations."
    ("metals.show-inferred-type" lsp-metals-show-inferred-type t)
    ("metals.remote-language-server" lsp-metals-remote-language-server)))
 
+(defconst lsp-metals--coursier-pgp-key "
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: Hostname:
+Version: Hockeypuck ~unreleased
+
+xsBNBF4xoUYBCAC46u7PaAXxHvolldZKqUm52SCpXudT03lGd56rb82MJUKnQNFk
+sg8kLyo7NnMyr3w0nhRngxA5ewegrBiaR9sjPpWbuT/t1FWfewidNuhqgKAiPowO
+Yb+1a8Axy8okrzkEo5sRlmQgFgp7vRqri3LXp83G+nFsoDnV/YcavFrAcfK0lCvY
+m/S8rcrOuqkfxfkFpIkIjkdxVFWlkfBZG4sxvrXTCYGJeTSsAKEYNJanq6DaUTjX
+f6y0oHpREb0/n1GJstqSQk0BIqW+Zkt3J3sPS6QZk3XPftSHJxmI7vb3IM9fW5T5
+5yTWJaD/RJVBGqWbFYoGheb6kAgfu5LEe6DvABEBAAHNXUFsZXhhbmRyZSBBcmNo
+YW1iYXVsdCAoVHJhdmlzIENJIGNvdXJzaWVyKSA8YWxleGFuZHJlLmFyY2hhbWJh
+dWx0K3RyYXZpc2NpY291cnNpZXJAZ21haWwuY29tPsLAlAQTAQgAPhYhBIAR/Unc
+F0nNZBN6880bnY3ITspWBQJeMaFGAhsDBQkDwmcABQsJCAcCBhUICQoLAgQWAgMB
+Ah4BAheAAAoJEM0bnY3ITspW8MMH/iyczeDl/qPRn4raBoVZ+fmKkNannjC8/uSr
+4ezMS1+8icaLNlWRiW49Apt4PkrGiOPtUhhsnc8c3TT9OK+ZLyONbqVIPoUGibwE
+FLii5szHXEc0M9SviVocxfNjFXu7xzj7OzWvBlC3Yp5KmL5c3gz6oFIKG9Te24mL
+Al2+eqxLsHxLyoNMo/llmjU0XNELXIegfh/dOja099W2mCk5ax1+xJQ/QzU38aaB
+zeanNQhLAE9JpL8M5NgVYBLDLikyzx5AHmPotv5IimaBqJAn7IBDtzRLThhY3Kgw
+KaDGzztFX9RGINzB98iSdB+vUnOiW4gNkyj7ephvryKlGjwIXcPOwE0EXjGhRgEI
+ANNDjQQdHtiVSU7bbtJqlXE6qxGh5jP62nCecO4waDxlWlC5tTMlh4zS3SOIkjxr
+9c59WH+pbFFwNq2ax1PimWupI0GbnT+NSxrkL9zw01TCqKqn5Ows/eWTGPCJrMzr
+6K2T4+0YIRwFWc/U8yFPrj+0zSAFriQulr5CKbT6JLb+TrXtw0BK2OYU7MpQQihF
+S4TZcb9EO4PYO7G3Vgdbz+MVBXauoiCYKWmqMxsAmMY/9/AswnYIe8POriIS5a+E
+BxiAnxflMiqCHFVw6ZSSGU7V4PKAxBzF8sQZnGE/+j6kXrDtZg6AG7f0+XMqNaah
+7lMFQ3Hk66sIuF9B/eL8mEkAEQEAAcLAfAQYAQgAJhYhBIAR/UncF0nNZBN6880b
+nY3ITspWBQJeMaFGAhsMBQkDwmcAAAoJEM0bnY3ITspWkz4H/AzycUhNRkXwuJ/2
+rOov48WpBjeZ1oywGjLm50XFR4KSXB4PTNVV7VgHVtJ7jbHQNACew2rl4i53Zrvq
+6kzrK8l2JpdtnjWOvZ2ho6+2Lg2pcLGEoj91YmXeK0ngSAHp+wFVedh1fveLLLUf
+xDdfr7Vs7fmtwVwWsfLNmAGu4FAuLOR0p6kep7d3HQY181GjnCuxMBMmVS/1v8Wx
+Lwgd0loRNRw/17GRRHGmFINGvbJ7HxhxQAuIG7z4IuxHEXLM8Gjoq1uJP7Vm67f9
+QGPHxHBRXBR1M4ZX5zkUWuziRT9XCXKbLMRqimh9v+Y5TNeMe0x1ukcDLMsnFdrF
+OpELeQg=
+=u8An
+-----END PGP PUBLIC KEY BLOCK-----
+")
+
+(lsp-dependency
+ 'coursier
+ '(:system "coursier")
+ `(:download :url ,lsp-metals-coursier-download-url
+             :asc-url ,lsp-metals-coursier-asc-url
+             :pgp-key ,lsp-metals--coursier-pgp-key
+             :store-path ,lsp-metals-coursier-store-path
+             :set-executable? t))
+
+(lsp-dependency
+ 'metals
+ `(:system ,lsp-metals-server-command)
+ `(:system ,lsp-metals-metals-store-path))
+
 (defun lsp-metals--server-command ()
   "Generate the Scala language server startup command."
-  `(,lsp-metals-server-command ,@lsp-metals-server-args))
+  `(,(lsp-package-path 'metals) ,@lsp-metals-server-args))
+
+(defun lsp-metals--download-server (_client callback error-callback _update?)
+  "Install metals server via coursier.
+Will invoke CALLBACK on success, ERROR-CALLBACK on error."
+  (lsp-package-ensure
+   'coursier
+   (lambda ()
+     (call-process
+      (lsp-package-path 'coursier)
+      nil
+      (get-buffer-create "*Coursier log*")
+      t
+      "bootstrap"
+      "--java-opt"
+      "-Xss4m"
+      "--java-opt"
+      "-Xms100m"
+      (concat "org.scalameta:metals_2.12:" lsp-metals-install-version)
+      "-r"
+      "bintray:scalacenter/releases"
+      "-r"
+      "sonatype:snapshots"
+      "-o"
+      lsp-metals-metals-store-path
+      "-f")
+     (funcall callback))
+   error-callback))
 
 (defun lsp-metals-build-import ()
   "Unconditionally run `sbt bloopInstall` and re-connect to the build server."
@@ -478,7 +601,8 @@ WORKSPACE is the workspace we received notification from."
                                        (lsp-configuration-section "metals"))))
                   :after-open-fn (lambda ()
                                    (add-hook 'lsp-on-idle-hook #'lsp-metals--did-focus nil t))
-                  :completion-in-comments? t))
+                  :completion-in-comments? t
+                  :download-server-fn #'lsp-metals--download-server))
 
 (defmacro lsp-metals--create-bool-toggle (name config var)
   "Create a toggle for lsp-metal config.
