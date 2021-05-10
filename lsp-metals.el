@@ -332,6 +332,26 @@ Will invoke CALLBACK on success, ERROR-CALLBACK on error."
   (interactive)
   (lsp-metals-treeview--send-execute-command-async "build-connect" ()))
 
+(defun lsp-metals-cancel-compilation ()
+  "Cancel the currently ongoing compilation, if any."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "compile-cancel" ()))
+
+(defun lsp-metals-cascade-compile ()
+  "Compile the current open files along with all build targets in this workspace that depend on those files."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "compile-cascade"))
+
+(defun lsp-metals-clean-compile ()
+  "Recompile all build targets in this workspace."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "compile-clean"))
+
+(defun lsp-metals-restart-build-server ()
+  "Unconditionally stop the current running Bloop server and start a new one using Bloop launcher."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "build-restart"))
+
 (defun lsp-metals-doctor-run ()
   "Open the Metals doctor to troubleshoot potential build problems."
   (interactive)
