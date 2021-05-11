@@ -316,6 +316,11 @@ Will invoke CALLBACK on success, ERROR-CALLBACK on error."
   (interactive)
   (lsp-metals-treeview--send-execute-command-async "build-restart"))
 
+(defun lsp-metals-new-scala-project ()
+  "Create a new Scala project using one of the available g8 templates."
+  (interactive)
+  (lsp--send-execute-command "new-scala-project"))
+
 (defun lsp-metals-doctor-run ()
   "Open the Metals doctor to troubleshoot potential build problems."
   (interactive)
@@ -643,6 +648,17 @@ WORKSPACE is the workspace we received notification from."
                             'local-map (lsp-metals--status-string-keymap workspace command?))
       workspace)))
 
+(lsp-defun lsp-metals--quick-pick (workspace (&MetalsQuickPickParams :items :place-holder?))
+  "The Metals quick pick request is sent from the server to the client to let the user provide a string value by picking one out of a number of given options."
+  (let* ((choices (seq-map (lambda (item)
+                             (-let* (((&MetalsQuickPickItem :id :label :description?) item))
+                               (cons (if description? (concat label " " (propertize description? 'face 'font-lock-comment-face)) label) id)))
+                           items)))
+    (if choices
+        (list :itemId (cdr (assoc (completing-read (concat place-holder? ": ") choices nil t) choices))))
+    )
+  )
+
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-stdio-connection 'lsp-metals--server-command)
                   :major-modes '(scala-mode)
@@ -654,12 +670,14 @@ WORKSPACE is the workspace we received notification from."
                                             (doctorProvider . "html")
                                             (statusBarProvider . "on")
                                             (debuggingProvider . t)
-                                            (treeViewProvider . t))
+                                            (treeViewProvider . t)
+                                            (quickPickProvider . t))
                   :notification-handlers (ht ("metals/executeClientCommand" #'lsp-metals--execute-client-command)
                                              ("metals/publishDecorations" #'lsp-metals--publish-decorations)
                                              ("metals/treeViewDidChange" #'lsp-metals-treeview--did-change)
                                              ("metals-model-refresh" #'lsp-metals--model-refresh)
                                              ("metals/status" #'lsp-metals--status-string))
+                  :request-handlers (ht ("metals/quickPick" #'lsp-metals--quick-pick))
                   :action-handlers (ht ("metals-debug-session-start" (-partial #'lsp-metals--debug-start :json-false))
                                        ("metals-run-session-start" (-partial #'lsp-metals--debug-start t)))
                   :server-id 'metals
