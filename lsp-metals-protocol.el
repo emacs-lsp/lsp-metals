@@ -34,6 +34,7 @@
   (MetalsStatusParams (:text) (:show :hide :tooltip :command))
   (MetalsQuickPickParams (:items) (:matchOnDescription :matchOnDetail :placeHolder :ignoreFocusOut))
   (MetalsQuickPickItem (:id :label) (:description :detail :alwaysShow))
+  (MetalsInputBoxParams (:prompt) (:value :placeHolder :password :ignoreFocusOut))
   (DecorationOptions (:range :renderOptions) (:hoverMessage))
   (ThemableDecorationInstanceRenderOption nil (:after))
   (ThemableDecorationAttachmentRenderOptions nil (:contentText :color :fontStyle))
