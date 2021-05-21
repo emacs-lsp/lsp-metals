@@ -105,14 +105,6 @@ It's used for indexing JDK sources and locating the `java' binary."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.0"))
 
-(defcustom lsp-metals-scalafmt-config-path ""
-  "Optional custom path to the .scalafmt.conf file.
-Should be relative to the workspace root directory and use forward
-slashes / for file separators (even on Windows)."
-  :type '(string)
-  :group 'lsp-metals
-  :package-version '(lsp-metals . "1.0"))
-
 (defcustom lsp-metals-sbt-script ""
   "Optional absolute path to an `sbt' executable.
 By default, Metals uses `java -jar sbt-launch.jar' with an embedded
@@ -230,7 +222,6 @@ displayed either as additional decorations."
 
 (lsp-register-custom-settings
  '(("metals.java-home" lsp-metals-java-home)
-   ("metals.scalafmt-config-path" lsp-metals-scalafmt-config-path)
    ("metals.sbt-script" lsp-metals-sbt-script)
    ("metals.gradle-script" lsp-metals-gradle-script)
    ("metals.maven-script" lsp-metals-maven-script)
