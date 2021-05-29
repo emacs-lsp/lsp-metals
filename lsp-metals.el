@@ -150,14 +150,6 @@ like using environment variables."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.0"))
 
-(defcustom lsp-metals-scalafmt-config-path ".scalafmt.conf"
-  "Optional custom path to the .scalafmt.conf file.
-Should be relative to the workspace root directory and use forward
-slashes / for file separators (even on Windows)."
-  :type '(string)
-  :group 'lsp-metals
-  :package-version '(lsp-metals . "1.0"))
-
 (defcustom lsp-metals-pants-targets ""
   "Space separated list of Pants targets to export.
 For example, `src/main/scala:: src/main/java::'.  Syntax such as
@@ -235,7 +227,6 @@ displayed either as additional decorations."
    ("metals.gradle-script" lsp-metals-gradle-script)
    ("metals.maven-script" lsp-metals-maven-script)
    ("metals.mill-script" lsp-metals-mill-script)
-   ("metals.scalafmt-config-path" lsp-metals-scalafmt-config-path)
    ("metals.pants-targets" lsp-metals-pants-targets)
    ("metals.bloop-sbt-already-installed" lsp-metals-bloop-sbt-already-installed t)
    ("metals.bloop-version" lsp-metals-bloop-version)
