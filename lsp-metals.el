@@ -646,7 +646,7 @@ WORKSPACE is the workspace we received notification from."
                             'local-map (lsp-metals--status-string-keymap workspace command?))
       workspace)))
 
-(lsp-defun lsp-metals--quick-pick (workspace (&MetalsQuickPickParams :items :place-holder?))
+(lsp-defun lsp-metals--quick-pick (_workspace (&MetalsQuickPickParams :items :place-holder?))
   "The Metals quick pick request is sent from the server to the client to let the user provide a string value by picking one out of a number of given options."
   (let* ((choices (seq-map (lambda (item)
                              (-let* (((&MetalsQuickPickItem :id :label :description?) item))
@@ -655,7 +655,7 @@ WORKSPACE is the workspace we received notification from."
     (if choices
         (list :itemId (cdr (assoc (completing-read (concat place-holder? ": ") choices nil t) choices))))))
 
-(lsp-defun lsp-metals--input-box (workspace (&MetalsInputBoxParams :prompt))
+(lsp-defun lsp-metals--input-box (_workspace (&MetalsInputBoxParams :prompt))
   "The Metals input box request is sent from the server to the client to let the user provide a string value for a given prompt."
   (list :value (read-from-minibuffer (concat prompt ": "))))
 
