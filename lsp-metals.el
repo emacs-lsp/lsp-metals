@@ -515,11 +515,55 @@ FOCUSED if there is a focused frame."
     (setq lsp-metals--current-buffer (current-buffer))
     (lsp-notify "metals/didFocusTextDocument" (lsp--buffer-uri))))
 
+
+(defun lsp-metals-populate-config (conf)
+  "Prepare CONF for debug session."
+  (if (and (plist-get conf :debugServer)
+           (plist-get conf :name))
+      conf
+    (-let (((&DebugSession :name :uri)
+            (lsp-send-execute-command
+             "debug-adapter-start"
+             (vector (list :data conf
+                           :dataKind (cond
+                                      ((equal "attach" (plist-get conf :request))
+                                       "scala-attach-remote")
+                                      ((plist-get conf :dataKind))
+                                      (t "scala-main-class"))
+                           :targets (or
+                                     (plist-get conf :targets)
+                                     (vector `(:uri ,(concat
+                                                      (lsp--path-to-uri (or (lsp-workspace-root)
+                                                                            (error "The debug provide can be called under project root")))
+                                                      "?id=root")))))))))
+      (-> conf
+          (dap--put-if-absent :name name)
+          (dap--put-if-absent :request "launch")
+          (dap--put-if-absent :host (or "localhost"
+                                        (plist-get conf :hostName)))
+          (dap--put-if-absent :debugServer
+                              (-> uri
+                                  (split-string ":")
+                                  cl-third
+                                  string-to-number))))))
+
+
+(dap-register-debug-provider "scala" #'lsp-metals-populate-config)
+
+(dap-register-debug-template
+ "Scala Main Class"
+ '(:class "<main.class>" :name "Scala Main Class" :arguments [] :jvmOptions [] :environmentVariables []))
+
+(dap-register-debug-template
+ "Scala Attach"
+ '(:type "scala" :request "attach" :name "Scala Attach" :hostName "localhost" :port 0))
+
+
 (lsp-defun lsp-metals--debug-start (no-debug (&Command :arguments?))
   "Start debug session.
 If NO-DEBUG is true launch the program without enabling debugging.
 PARAMS are the action params."
-  (dap-register-debug-provider "scala" #'identity)
+  ;; make sure the arguments are plist
   (-let (((&DebugSession :name :uri) (lsp-send-execute-command
                                       "debug-adapter-start"
                                       arguments?)))
