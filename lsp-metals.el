@@ -302,7 +302,7 @@ Will invoke CALLBACK on success, ERROR-CALLBACK on error."
   (lsp-metals-treeview--send-execute-command-async "compile-cancel" ()))
 
 (defun lsp-metals-cascade-compile ()
-  "Compile the current open files along with all build targets in this workspace that depend on those files."
+  "Cascade compile all open files."
   (interactive)
   (lsp-metals-treeview--send-execute-command-async "compile-cascade"))
 
@@ -312,12 +312,12 @@ Will invoke CALLBACK on success, ERROR-CALLBACK on error."
   (lsp-metals-treeview--send-execute-command-async "compile-clean"))
 
 (defun lsp-metals-restart-build-server ()
-  "Unconditionally stop the current running Bloop server and start a new one using Bloop launcher."
+  "Unconditionally stop the current running Bloop server and start a new one."
   (interactive)
   (lsp-metals-treeview--send-execute-command-async "build-restart"))
 
 (defun lsp-metals-new-scala-file ()
-  "Create and open new file with either scala class, object, trait, package object or worksheet."
+  "Create a new file either a class, object, trait, package object or worksheet."
   (interactive)
   (lsp--send-execute-command "new-scala-file" (concat "file://" default-directory)))
 
@@ -654,16 +654,19 @@ WORKSPACE is the workspace we received notification from."
       workspace)))
 
 (lsp-defun lsp-metals--quick-pick (_workspace (&MetalsQuickPickParams :items :place-holder?))
-  "The Metals quick pick request is sent from the server to the client to let the user provide a string value by picking one out of a number of given options."
+  "Provide a string value by picking from given options."
   (let* ((choices (seq-map (lambda (item)
                              (-let* (((&MetalsQuickPickItem :id :label :description?) item))
-                               (cons (if description? (concat label " " (propertize description? 'face 'font-lock-comment-face)) label) id)))
+                               (cons (if description?
+                                         (concat label " " (propertize description? 'face 'font-lock-comment-face))
+                                       label)
+                                     id)))
                            items)))
     (if choices
         (list :itemId (cdr (assoc (completing-read (concat place-holder? ": ") choices nil t) choices))))))
 
 (lsp-defun lsp-metals--input-box (_workspace (&MetalsInputBoxParams :prompt))
-  "The Metals input box request is sent from the server to the client to let the user provide a string value for a given prompt."
+  "Provide a string value for a given prompt."
   (list :value (read-from-minibuffer (concat prompt ": "))))
 
 (lsp-register-client
