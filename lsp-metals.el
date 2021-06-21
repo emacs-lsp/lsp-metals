@@ -328,6 +328,36 @@ Will invoke CALLBACK on success, ERROR-CALLBACK on error."
   (interactive)
   (lsp-metals-treeview--send-execute-command-async "build-connect" ()))
 
+(defun lsp-metals-cancel-compilation ()
+  "Cancel the currently ongoing compilation, if any."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "compile-cancel" ()))
+
+(defun lsp-metals-cascade-compile ()
+  "Cascade compile all open files."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "compile-cascade"))
+
+(defun lsp-metals-clean-compile ()
+  "Recompile all build targets in this workspace."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "compile-clean"))
+
+(defun lsp-metals-restart-build-server ()
+  "Unconditionally stop the current running Bloop server and start a new one."
+  (interactive)
+  (lsp-metals-treeview--send-execute-command-async "build-restart"))
+
+(defun lsp-metals-new-scala-file ()
+  "Create a new file either a class, object, trait, package object or worksheet."
+  (interactive)
+  (lsp--send-execute-command "new-scala-file" (concat "file://" default-directory)))
+
+(defun lsp-metals-new-scala-project ()
+  "Create a new Scala project using one of the available g8 templates."
+  (interactive)
+  (lsp--send-execute-command "new-scala-project"))
+
 (defun lsp-metals-doctor-run ()
   "Open the Metals doctor to troubleshoot potential build problems."
   (interactive)
@@ -609,6 +639,22 @@ WORKSPACE is the workspace we received notification from."
                             'local-map (lsp-metals--status-string-keymap workspace command?))
       workspace)))
 
+(lsp-defun lsp-metals--quick-pick (_workspace (&MetalsQuickPickParams :items :place-holder?))
+  "Provide a string value by picking from given options."
+  (let* ((choices (seq-map (lambda (item)
+                             (-let* (((&MetalsQuickPickItem :id :label :description?) item))
+                               (cons (if description?
+                                         (concat label " " (propertize description? 'face 'font-lock-comment-face))
+                                       label)
+                                     id)))
+                           items)))
+    (if choices
+        (list :itemId (cdr (assoc (completing-read (concat place-holder? ": ") choices nil t) choices))))))
+
+(lsp-defun lsp-metals--input-box (_workspace (&MetalsInputBoxParams :prompt))
+  "Provide a string value for a given prompt."
+  (list :value (read-from-minibuffer (concat prompt ": "))))
+
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-stdio-connection 'lsp-metals--server-command)
                   :major-modes '(scala-mode)
@@ -620,12 +666,16 @@ WORKSPACE is the workspace we received notification from."
                                             (doctorProvider . "html")
                                             (statusBarProvider . "on")
                                             (debuggingProvider . t)
-                                            (treeViewProvider . t))
+                                            (treeViewProvider . t)
+                                            (quickPickProvider . t)
+                                            (inputBoxProvider . t))
                   :notification-handlers (ht ("metals/executeClientCommand" #'lsp-metals--execute-client-command)
                                              ("metals/publishDecorations" #'lsp-metals--publish-decorations)
                                              ("metals/treeViewDidChange" #'lsp-metals-treeview--did-change)
                                              ("metals-model-refresh" #'lsp-metals--model-refresh)
                                              ("metals/status" #'lsp-metals--status-string))
+                  :request-handlers (ht ("metals/quickPick" #'lsp-metals--quick-pick)
+                                        ("metals/inputBox" #'lsp-metals--input-box))
                   :action-handlers (ht ("metals-debug-session-start" (-partial #'lsp-metals--debug-start :json-false))
                                        ("metals-run-session-start" (-partial #'lsp-metals--debug-start t)))
                   :server-id 'metals
