@@ -219,6 +219,10 @@ displayed either as additional decorations."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.0"))
 
+(defface lsp-metals-face-overlay
+  '((t :inherit font-lock-comment-face))
+  "Face used for metals decoration overlays."
+  :group 'lsp-metals)
 
 (lsp-register-custom-settings
  '(("metals.java-home" lsp-metals-java-home)
@@ -442,7 +446,7 @@ WORKSPACE is the workspace the notification was received from."
           (ov (make-overlay (car region) (cdr region) nil t t)))
     (-when-let* (((&ThemableDecorationInstanceRenderOption :after?) render-options)
                   ((&ThemableDecorationAttachmentRenderOptions :content-text?) after?))
-      (overlay-put ov 'after-string (propertize content-text? 'cursor t 'font-lock-face 'font-lock-comment-face)))
+      (overlay-put ov 'after-string (propertize content-text? 'cursor t 'font-lock-face 'lsp-metals-face-overlay)))
     (when hover-message?
       (-let (((&MarkupContent :value) hover-message?))
         (overlay-put ov 'help-echo value)))
