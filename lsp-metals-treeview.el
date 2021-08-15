@@ -332,7 +332,6 @@ the context of the window closing."
 
 (define-minor-mode lsp-metals-treeview-mode
   "LSP Metals Treeview minor mode."
-  nil nil nil
   :keymap lsp-metals-treeview-mode-map
   :group 'lsp-metals-treeview)
 
