@@ -541,7 +541,7 @@ FOCUSED if there is a focused frame."
                                                                             (error "The debug provide can be called under project root")))
                                                       "?id="
                                                       (or
-                                                       (plist-get conf :projectId)
+                                                       (plist-get conf :buildTarget)
                                                        "root"))))))))))
       (-> conf
           (dap--put-if-absent :name name)
