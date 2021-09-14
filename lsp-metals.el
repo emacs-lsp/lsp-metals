@@ -539,7 +539,10 @@ FOCUSED if there is a focused frame."
                                      (vector `(:uri ,(concat
                                                       (lsp--path-to-uri (or (lsp-workspace-root)
                                                                             (error "The debug provide can be called under project root")))
-                                                      "?id=root")))))))))
+                                                      "?id="
+                                                      (or
+                                                       (plist-get conf :buildTarget)
+                                                       "root"))))))))))
       (-> conf
           (dap--put-if-absent :name name)
           (dap--put-if-absent :request "launch")
