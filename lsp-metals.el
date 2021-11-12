@@ -370,7 +370,7 @@ change it again."
   (interactive)
   (lsp-send-execute-command
    "super-method-hierarchy"
-   `(:document ,(lsp--buffer-uri) :position ,(lsp-point-to-position (point)))))
+   (lsp--text-document-position-params)))
 
 (defun lsp-metals--doctor-render (html)
   "Render the Metals doctor HTML in the current buffer."
