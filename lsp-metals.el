@@ -365,7 +365,6 @@ change it again."
       (let ((stacktrace (buffer-substring (region-beginning) (region-end))))
         (lsp-send-execute-command "metals.analyze-stacktrace" (vector stacktrace))))))
 
-
 (defun lsp-metals-super-method-hierarchy ()
   "Calculate inheritance hierarchy of a class that should contain given method."
   (interactive)
@@ -378,16 +377,18 @@ change it again."
   (format "*%s: %s*" format-id name))
 
 (defun lsp-metals-decode-file (format-id)
-  "View the decoded representation of the given format"
-  (let ((encoded-path (format "metalsDecode:%s.%s" (lsp--buffer-uri) format-id)))
-    (let ((command-result (lsp-send-execute-command "metals.file-decode" encoded-path)))
-      (when-let ((value (lsp-get command-result :value)))
-        (pop-to-buffer (lsp-metals--generate-decode-file-buffer-name buffer-file-name format-id))
-        (setq-local show-trailing-whitespace nil)
-        (setq-local buffer-read-only nil)
-        (erase-buffer)
-        (insert value)
-        (view-mode 1)))))
+  "View the decoded representation of the given format for the current buffer."
+  (when-let* ((encoded-path (format "metalsDecode:%s.%s" (lsp--buffer-uri) format-id))
+              (command-result (lsp-send-execute-command "metals.file-decode" encoded-path))
+              (value (lsp-get command-result :value)))
+    (pop-to-buffer (lsp-metals--generate-decode-file-buffer-name buffer-file-name format-id))
+    (setq-local show-trailing-whitespace nil)
+    (setq-local buffer-read-only nil)
+    (erase-buffer)
+    (insert value)
+    (goto-char (point-min))
+    (view-mode 1)
+    (setq view-exit-action 'kill-buffer)))
 
 (defun lsp-metals-view-javap ()
   "View javap for a class in the current file."
