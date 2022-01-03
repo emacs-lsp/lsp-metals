@@ -402,6 +402,13 @@ change it again."
    "super-method-hierarchy"
    (lsp--text-document-position-params)))
 
+(defun lsp-metals-goto-super-method ()
+  "Jumps to super method/field definition of a symbol under cursor."
+  (interactive)
+  (lsp-send-execute-command
+   "goto-super-method"
+   (lsp--text-document-position-params)))
+
 (defun lsp-metals--doctor-render (html)
   "Render the Metals doctor HTML in the current buffer."
   (require 'shr)
