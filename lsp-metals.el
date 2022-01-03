@@ -366,6 +366,13 @@ change it again."
    "super-method-hierarchy"
    (lsp--text-document-position-params)))
 
+(defun lsp-metals-goto-super-method ()
+  "Jumps to super method/field definition of a symbol under cursor."
+  (interactive)
+  (lsp-send-execute-command
+   "goto-super-method"
+   (lsp--text-document-position-params)))
+
 (defun lsp-metals--generate-decode-file-buffer-name (name format-id)
   "Generate DecodeFile buffer name for the given FORMAT-ID and NAME."
   (format "*%s: %s*" format-id name))
