@@ -373,11 +373,11 @@ change it again."
    (lsp--text-document-position-params)))
 
 (defun lsp-metals--generate-decode-file-buffer-name (name format-id)
-  "Generate DecodeFile buffer name for the WORKSPACE."
+  "Generate DecodeFile buffer name for the given FORMAT-ID and NAME."
   (format "*%s: %s*" format-id name))
 
 (defun lsp-metals-decode-file (format-id)
-  "View the decoded representation of the given format for the current buffer."
+  "View the decoded representation of the given FORMAT-ID for the current buffer."
   (when-let* ((encoded-path (format "metalsDecode:%s.%s" (lsp--buffer-uri) format-id))
               (command-result (lsp-send-execute-command "metals.file-decode" encoded-path))
               (value (lsp-get command-result :value)))
