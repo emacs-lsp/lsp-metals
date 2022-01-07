@@ -372,6 +372,49 @@ change it again."
    "super-method-hierarchy"
    (lsp--text-document-position-params)))
 
+(defun lsp-metals--generate-decode-file-buffer-name (name format-id)
+  "Generate DecodeFile buffer name for the WORKSPACE."
+  (format "*%s: %s*" format-id name))
+
+(defun lsp-metals-decode-file (format-id)
+  "View the decoded representation of the given format for the current buffer."
+  (when-let* ((encoded-path (format "metalsDecode:%s.%s" (lsp--buffer-uri) format-id))
+              (command-result (lsp-send-execute-command "metals.file-decode" encoded-path))
+              (value (lsp-get command-result :value)))
+    (pop-to-buffer (lsp-metals--generate-decode-file-buffer-name buffer-file-name format-id))
+    (setq-local show-trailing-whitespace nil)
+    (setq-local buffer-read-only nil)
+    (erase-buffer)
+    (insert value)
+    (goto-char (point-min))
+    (view-mode 1)
+    (setq view-exit-action 'kill-buffer)))
+
+(defun lsp-metals-view-javap ()
+  "View javap for a class in the current file."
+  (interactive)
+  (lsp-metals-decode-file "javap"))
+
+(defun lsp-metals-view-javap-verbose ()
+  "View javap verbose a class in the for current file."
+  (interactive)
+  (lsp-metals-decode-file "javap-verbose"))
+
+(defun lsp-metals-view-semanticdb-compact ()
+  "View semanticdb compact for current file."
+  (interactive)
+  (lsp-metals-decode-file "semanticdb-compact"))
+
+(defun lsp-metals-view-semanticdb-detailed ()
+  "View semanticdb detailed for current file."
+  (interactive)
+  (lsp-metals-decode-file "semanticdb-detailed"))
+
+(defun lsp-metals-view-tasty-decoded ()
+  "View tasty decoded for current file."
+  (interactive)
+  (lsp-metals-decode-file "tasty-decoded"))
+
 (defun lsp-metals--doctor-render (html)
   "Render the Metals doctor HTML in the current buffer."
   (require 'shr)
