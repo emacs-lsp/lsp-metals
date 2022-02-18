@@ -602,7 +602,7 @@ FOCUSED if there is a focused frame."
 
 (dap-register-debug-template
  "Scala Main Class"
- '(:class "<main.class>" :name "Scala Main Class" :arguments [] :jvmOptions [] :environmentVariables []))
+ '(:type "scala" :class "<main.class>" :name "Scala Main Class" :arguments [] :jvmOptions [] :environmentVariables []))
 
 (dap-register-debug-template
  "Scala Attach"
