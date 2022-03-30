@@ -662,15 +662,15 @@ WORKSPACE is the workspace we received notification from."
 
 (lsp-defun lsp-metals--quick-pick (_workspace (&MetalsQuickPickParams :items :place-holder?))
   "Provide a string value by picking from given options."
-  (let* ((choices (seq-map (lambda (item)
-                             (-let* (((&MetalsQuickPickItem :id :label :description?) item))
-                               (cons (if description?
-                                         (concat label " " (propertize description? 'face 'font-lock-comment-face))
-                                       label)
-                                     id)))
-                           items)))
+  (let* ((choices (--map (-let* (((&MetalsQuickPickItem :id :label :description?) it))
+                           (cons label (cons id description?)))
+                         items)))
     (if choices
-        (list :itemId (cdr (assoc (completing-read (concat place-holder? ": ") choices nil t) choices))))))
+        (let ((completion-extra-properties
+               `(:annotation-function (lambda (c)
+                                        (-when-let (description (cdr (cdr (assoc c ',choices))))
+                                          (concat " " description))))))
+          (list :itemId (car (cdr (assoc (completing-read (concat place-holder? ": ") choices nil t) choices))))))))
 
 (lsp-defun lsp-metals--input-box (_workspace (&MetalsInputBoxParams :prompt))
   "Provide a string value for a given prompt."
