@@ -493,13 +493,13 @@ WORKSPACE is the workspace the notification was received from."
 (lsp-defun lsp-metals--make-overlay ((&DecorationOptions :range :render-options :hover-message?))
   "Create overlay from metals decoration."
   (let* ((region (lsp--range-to-region range))
-          (ov (make-overlay (car region) (cdr region) nil t t)))
+         (ov (make-overlay (car region) (cdr region) nil t t)))
     (-when-let* (((&ThemableDecorationInstanceRenderOption :after?) render-options)
-                  ((&ThemableDecorationAttachmentRenderOptions :content-text?) after?))
-      (overlay-put ov 'after-string (propertize content-text? 'cursor t 'font-lock-face 'lsp-metals-face-overlay)))
-    (when hover-message?
-      (-let (((&MarkupContent :value) hover-message?))
-        (overlay-put ov 'help-echo value)))
+                 ((&ThemableDecorationAttachmentRenderOptions :content-text?) after?)
+                 (text (if hover-message?
+                           (propertize content-text? 'help-echo (lsp--render-element hover-message?))
+                         content-text?)))
+      (overlay-put ov 'after-string (propertize text 'cursor t 'font-lock-face 'lsp-metals-face-overlay)))
     (overlay-put ov 'metals-decoration t)))
 
 (defun lsp-metals--logs-toggle (_workspace)
