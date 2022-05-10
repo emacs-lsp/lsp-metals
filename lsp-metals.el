@@ -93,6 +93,12 @@
   :type 'string
   :package-version '(lsp-metals . "1.3"))
 
+(defcustom lsp-metals-install-scala-version "2.13"
+  "Metals scala version to install."
+  :group 'lsp-metals
+  :type 'string
+  :package-version '(lsp-metals . "1.3"))
+
 (defcustom lsp-metals-install-version "latest.release"
   "Metals version to install."
   :group 'lsp-metals
@@ -275,7 +281,7 @@ Will invoke CALLBACK on success, ERROR-CALLBACK on error."
       "-Xss4m"
       "--java-opt"
       "-Xms100m"
-      (concat "org.scalameta:metals_2.12:" lsp-metals-install-version)
+      (concat "org.scalameta:metals_" lsp-metals-install-scala-version ":" lsp-metals-install-version)
       "-r"
       "bintray:scalacenter/releases"
       "-r"
