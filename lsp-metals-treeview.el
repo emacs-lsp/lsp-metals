@@ -83,8 +83,8 @@ different workspaces."
   "The theme for treeview icons."
   :group 'lsp-metals-treeview
   :type '(choice
-           (const :tag "Light" 'Metals-light)
-           (const :tag "Dark" 'Metals-dark))
+           (const :tag "Light" Metals-light)
+           (const :tag "Dark" Metals-dark))
   :package-version '(lsp-metals . "1.2"))
 
 (defvar-local lsp-metals-treeview--current-workspace nil
