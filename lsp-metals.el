@@ -379,16 +379,15 @@ change it again."
    "goto-super-method"
    (lsp--text-document-position-params)))
 
-(defun lsp-metals--generate-decode-file-buffer-name (name format-id)
-  "Generate DecodeFile buffer name for the given FORMAT-ID and NAME."
-  (format "*%s: %s*" format-id name))
+(defun lsp-metals--generate-decode-file-buffer-name (uri)
+  "Generate DecodeFile buffer name for the given URI."
+  (format "*%s*" (file-name-nondirectory uri)))
 
-(defun lsp-metals-decode-file (format-id)
-  "View the decoded representation of the given FORMAT-ID for the current buffer."
-  (when-let* ((encoded-path (format "metalsDecode:%s.%s" (lsp--buffer-uri) format-id))
-              (command-result (lsp-send-execute-command "metals.file-decode" encoded-path))
+(defun lsp-metals--decode (uri)
+  "View the decoded representation of the given URI."
+  (when-let* ((command-result (lsp-send-execute-command "metals.file-decode" uri))
               (value (lsp-get command-result :value)))
-    (pop-to-buffer (lsp-metals--generate-decode-file-buffer-name buffer-file-name format-id))
+    (pop-to-buffer (lsp-metals--generate-decode-file-buffer-name uri))
     (setq-local show-trailing-whitespace nil)
     (setq-local buffer-read-only nil)
     (erase-buffer)
@@ -396,6 +395,10 @@ change it again."
     (goto-char (point-min))
     (view-mode 1)
     (setq view-exit-action 'kill-buffer)))
+
+(defun lsp-metals-decode-file (format-id)
+  "View the decoded representation of the given FORMAT-ID for the current buffer."
+  (lsp-metals--decode (format "metalsDecode:%s.%s" (lsp--buffer-uri) format-id)))
 
 (defun lsp-metals-view-javap ()
   "View javap for a class in the current file."
@@ -422,11 +425,21 @@ change it again."
   (interactive)
   (lsp-metals-decode-file "tasty-decoded"))
 
-(defun lsp-metals--doctor-render (html)
-  "Render the Metals doctor HTML in the current buffer."
+(defun lsp-metals--browse-url (url &rest _)
+  "Handle `command:' matals URLs."
+  (when-let* ((workspace (lsp-find-workspace 'metals default-directory))
+              (decoded (url-unhex-string url))
+              ((string-match "command:\\(.*\\)\\?\\(.*\\)" decoded))
+              (command (match-string 1 decoded))
+              (arguments (lsp--read-json (match-string 2 decoded))))
+    (lsp-metals--execute-client-command workspace (lsp-make-execute-command-params :command command :arguments? arguments))))
+
+(defun lsp-metals--render-html (html)
+  "Render the Metals HTML in the current buffer."
   (require 'shr)
   (setq-local show-trailing-whitespace nil)
   (setq-local buffer-read-only nil)
+  (setq-local browse-url-handlers '(("\\`command:" . lsp-metals--browse-url)))
   (erase-buffer)
   (insert html)
   (shr-render-region (point-min) (point-max))
@@ -443,7 +456,7 @@ change it again."
 HTML is the help contents.
 WORKSPACE is the workspace the client command was received from."
   (pop-to-buffer (lsp-metals--generate-doctor-buffer-name workspace))
-  (lsp-metals--doctor-render html))
+  (lsp-metals--render-html html))
 
 (defun lsp-metals--doctor-reload (workspace html)
   "Reload the HTML contents of an open Doctor window, if any.
@@ -451,17 +464,21 @@ Should be ignored if there is no open doctor window.
 WORKSPACE is the workspace the client command was received from."
   (when-let ((buffer (get-buffer (lsp-metals--generate-doctor-buffer-name workspace))))
     (with-current-buffer buffer
-      (lsp-metals--doctor-render html))))
+      (lsp-metals--render-html html))))
 
-(defun lsp-metals--goto-location (_workspace location &optional _)
-  "Move the cursor focus to the provided LOCATION."
-  (let ((xrefs (lsp--locations-to-xref-items (list location))))
-    (if (boundp 'xref-show-definitions-function)
-      (with-no-warnings
-        (funcall xref-show-definitions-function
-          (-const xrefs)
-          `((window . ,(selected-window)))))
-      (xref--show-xrefs xrefs nil))))
+(defun lsp-metals--goto-location (workspace location &optional _)
+  "Move the cursor focus to the provided LOCATION.
+WORKSPACE is the workspace the client command was received from."
+  (let ((uri (url-unhex-string (lsp--location-uri location))))
+    (if (string-prefix-p "metalsDecode:" uri)
+        (with-lsp-workspace workspace (lsp-metals--decode uri))
+      (let ((xrefs (lsp--locations-to-xref-items (list location))))
+        (if (boundp 'xref-show-definitions-function)
+            (with-no-warnings
+              (funcall xref-show-definitions-function
+                       (-const xrefs)
+                       `((window . ,(selected-window)))))
+          (xref--show-xrefs xrefs nil))))))
 
 (defun lsp-metals--echo-command (workspace command)
   "A client COMMAND that should be forwarded back to the Metals server.
@@ -510,10 +527,22 @@ WORKSPACE is the workspace the notification was received from."
   "Focus on the window that lists all published diagnostics."
   (lsp-treemacs-errors-list))
 
+(defun lsp-metals--show-stacktrace (_workspace html)
+  "Display stacktrace in a new buffer.
+HTML is the stacktrace contents."
+  (pop-to-buffer (generate-new-buffer "*Metals Stacktrace*"))
+  (lsp-metals--render-html html))
+
+(defun lsp-metals--reset-choice (workspace &optional choice?)
+  "Reset a decision you made about different settings.
+WORKSPACE is the workspace the notification was received from.
+CHOICE is the decision to reset."
+  (with-lsp-workspace workspace (lsp-send-execute-command "reset-choice" choice?)))
+
 (lsp-defun lsp-metals--execute-client-command (workspace (&ExecuteCommandParams :command :arguments?))
   "Handle the metals/executeClientCommand extension notification.
 WORKSPACE is the workspace the notification was received from."
-  (when-let ((command (pcase command
+  (when-let ((command (pcase (string-remove-prefix "metals." command)
                         (`"metals-doctor-run" #'lsp-metals--doctor-run)
                         (`"metals-doctor-reload" #'lsp-metals--doctor-reload)
                         (`"metals-logs-toggle" #'lsp-metals--logs-toggle)
@@ -521,6 +550,8 @@ WORKSPACE is the workspace the notification was received from."
                         (`"metals-goto-location" #'lsp-metals--goto-location)
                         (`"metals-echo-command" #'lsp-metals--echo-command)
                         (`"metals-model-refresh" #'lsp-metals--model-refresh)
+                        (`"metals-show-stacktrace" #'lsp-metals--show-stacktrace)
+                        (`"reset-choice" #'lsp-metals--reset-choice)
                         (c (ignore (lsp-warn "Unknown metals client command: %s" c))))))
     (apply command (append (list workspace) arguments? nil))))
 
@@ -695,7 +726,8 @@ WORKSPACE is the workspace we received notification from."
                                             (debuggingProvider . t)
                                             (treeViewProvider . t)
                                             (quickPickProvider . t)
-                                            (inputBoxProvider . t))
+                                            (inputBoxProvider . t)
+                                            (commandInHtmlFormat . "vscode"))
                   :notification-handlers (ht ("metals/executeClientCommand" #'lsp-metals--execute-client-command)
                                              ("metals/publishDecorations" #'lsp-metals--publish-decorations)
                                              ("metals/treeViewDidChange" #'lsp-metals-treeview--did-change)
