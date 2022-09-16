@@ -231,6 +231,22 @@ displayed either as additional decorations."
   "Face used for metals decoration overlays."
   :group 'lsp-metals)
 
+(defconst lsp-metals--javap-format-id "javap")
+
+(defconst lsp-metals--javap-verbose-format-id "javap-verbose")
+
+(defconst lsp-metals--semanticdb-compact-format-id "semanticdb-compact")
+
+(defconst lsp-metals--semanticdb-detailed-format-id "semanticdb-detailed")
+
+(defconst lsp-metals--tasty-decoded-format-id "tasty-decoded")
+
+(defconst lsp-metals--all-format-ids (list lsp-metals--javap-format-id
+                                           lsp-metals--javap-verbose-format-id
+                                           lsp-metals--semanticdb-compact-format-id
+                                           lsp-metals--semanticdb-detailed-format-id
+                                           lsp-metals--tasty-decoded-format-id))
+
 (lsp-register-custom-settings
  '(("metals.java-home" lsp-metals-java-home)
    ("metals.scalafmt-config-path" lsp-metals-scalafmt-config-path)
@@ -393,37 +409,47 @@ change it again."
     (erase-buffer)
     (insert value)
     (goto-char (point-min))
+    (when (string-suffix-p "javap" uri)
+      (require 'cc-mode)
+      (java-mode)
+      (insert "// "))
     (view-mode 1)
     (setq view-exit-action 'kill-buffer)))
 
 (defun lsp-metals-decode-file (format-id)
-  "View the decoded representation of the given FORMAT-ID for the current buffer."
+  "View the decoded representation of the given FORMAT-ID for the current buffer.
+
+When run as a command, prompt for the format id to use from
+`lsp-metals--all-format-ids'.  See URL
+`https://scalameta.org/metals/docs/integrations/new-editor/#decode-file'
+for more information on the metals \"files-decode\" command."
+  (interactive (list (completing-read "format: " lsp-metals--all-format-ids)))
   (lsp-metals--decode (format "metalsDecode:%s.%s" (lsp--buffer-uri) format-id)))
 
 (defun lsp-metals-view-javap ()
   "View javap for a class in the current file."
   (interactive)
-  (lsp-metals-decode-file "javap"))
+  (lsp-metals-decode-file lsp-metals--javap-format-id))
 
 (defun lsp-metals-view-javap-verbose ()
   "View javap verbose a class in the for current file."
   (interactive)
-  (lsp-metals-decode-file "javap-verbose"))
+  (lsp-metals-decode-file lsp-metals--javap-verbose-format-id))
 
 (defun lsp-metals-view-semanticdb-compact ()
   "View semanticdb compact for current file."
   (interactive)
-  (lsp-metals-decode-file "semanticdb-compact"))
+  (lsp-metals-decode-file lsp-metals--semanticdb-compact-format-id))
 
 (defun lsp-metals-view-semanticdb-detailed ()
   "View semanticdb detailed for current file."
   (interactive)
-  (lsp-metals-decode-file "semanticdb-detailed"))
+  (lsp-metals-decode-file lsp-metals--semanticdb-detailed-format-id))
 
 (defun lsp-metals-view-tasty-decoded ()
   "View tasty decoded for current file."
   (interactive)
-  (lsp-metals-decode-file "tasty-decoded"))
+  (lsp-metals-decode-file lsp-metals--tasty-decoded-format-id))
 
 (defun lsp-metals--browse-url (url &rest _)
   "Handle `command:' matals URLs."
