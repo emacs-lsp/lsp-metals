@@ -640,12 +640,6 @@ FOCUSED if there is a focused frame."
                                   cl-third
                                   string-to-number))))))
 
-(defun lsp-metals-run-scalafix-rules-on-save ()
-  "Run the \"scalafix-run\" command prior to saving the current buffer.
-This runs all scalafix rules on the current buffer.  Note this requires metals
-v0.11.7 or greater."
-  (add-hook 'before-save-hook #'lsp-metals-run-scalafix nil t))
-
 (dap-register-debug-provider "scala" #'lsp-metals-populate-config)
 
 (dap-register-debug-template

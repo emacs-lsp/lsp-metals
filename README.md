@@ -20,8 +20,5 @@ An example to setup `lsp-metals` using `use-package`:
   ;; formatting of multiline strings only. You might want to disable it so that
   ;; emacs can use indentation provided by scala-mode.
   (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"))
-  :hook ((scala-mode . lsp)
-         ;; Optional: run scalafix rules on the current buffer before saving
-         ;; requires metals >= v0.11.7.
-         (scala-mode . lsp-metals-run-scalafix-rules-on-save)))
+  :hook (scala-mode . lsp))
 ```
