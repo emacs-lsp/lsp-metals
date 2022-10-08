@@ -114,8 +114,16 @@ It's used for indexing JDK sources and locating the `java' binary."
 
 (defcustom lsp-metals-scalafmt-config-path ""
   "Optional custom path to the .scalafmt.conf file.
-Should be relative to the workspace root directory and use forward
-slashes / for file separators (even on Windows)."
+Should be an absolute path and use forward slashes / for file
+separators (even on Windows)."
+  :type '(string)
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.0"))
+
+(defcustom lsp-metals-scalafix-config-path ""
+  "Optional custom path to the .scalafix.conf file.
+Should be an absolute path and use forward slashes / for file
+separators (even on Windows)."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.0"))
@@ -164,6 +172,11 @@ For example, `src/main/scala:: src/main/java::'.  Syntax such as
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.0"))
+
+(make-obsolete-variable
+ 'lsp-metals-pants-targets
+ "metals.pants-targets is no longer a valid configuration option, using it will have no effect."
+ "1.3")
 
 (defcustom lsp-metals-bloop-sbt-already-installed nil
   "If true, Metals will not generate a `project/metals.sbt' file.
@@ -220,6 +233,68 @@ displayed either as additional decorations."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.2"))
 
+(defcustom lsp-metals-ammonite-jvm-properties nil
+  "Optional vector of JVM properties to pass along to the Ammonite server.
+Each property needs to be a separate item.
+
+Example: -Xmx1G or -Xms100M."
+  :type '(lsp-repeatable-vector string)
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-enable-indent-on-paste nil
+  "Indent snippets when pasted.
+
+When this option is enabled, when a snippet is pasted into a Scala file,
+Metals will try to adjust the indentation to that of the current cursor."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-fallback-scala-version "3.2.0"
+  "The Scala compiler version that is used as the default or fallback.
+Used when a file doesn't belong to any build target or the specified Scala
+version isn't supported by Metals.  This applies to standalone Scala files,
+worksheets, and Ammonite scripts."
+  :type 'string
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-test-user-interface "Code Lenses"
+  "Default way of handling tests and test suites."
+  :type 'string
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-java-format.eclipse-config-path ""
+  "Optional custom path to the eclipse-formatter.xml file.
+
+Should be an absolute path and use forward slashes / for file separators (even
+on Windows)."
+  :type 'string
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-java-format.eclipse-profile ""
+  "The eclipse profile name.
+
+If the Eclipse formatter file contains more than one profile, this option can be
+used to control which is used."
+  :type 'string
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-scala-cli-launcher ""
+  "Optional absolute path to a scala-cli executable.
+
+The executable will be used for running a Scala CLI BSP server.  By default,
+Metals uses the scala-cli from the PATH, or if it's not found, downloads and
+runs Scala CLI on the JVM (slower than native Scala CLI).  Update this if you
+want to use a custom Scala CLI launcher, not available in PATH."
+  :type 'string
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
 (defcustom lsp-metals-remote-language-server ""
   "A URL pointing to a remote language server."
   :type '(string)
@@ -233,19 +308,26 @@ displayed either as additional decorations."
 
 (lsp-register-custom-settings
  '(("metals.java-home" lsp-metals-java-home)
-   ("metals.scalafmt-config-path" lsp-metals-scalafmt-config-path)
    ("metals.sbt-script" lsp-metals-sbt-script)
    ("metals.gradle-script" lsp-metals-gradle-script)
    ("metals.maven-script" lsp-metals-maven-script)
    ("metals.mill-script" lsp-metals-mill-script)
-   ("metals.pants-targets" lsp-metals-pants-targets)
+   ("metals.scalafmt-config-path" lsp-metals-scalafmt-config-path)
+   ("metals.scalafix-config-path" lsp-metals-scalafix-config-path)
+   ("metals.ammonite-jvm-properties" lsp-metals-ammonite-jvm-properties)
    ("metals.bloop-sbt-already-installed" lsp-metals-bloop-sbt-already-installed t)
    ("metals.bloop-version" lsp-metals-bloop-version)
    ("metals.super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled t)
+   ("metals.show-inferred-type" lsp-metals-show-inferred-type t)
    ("metals.show-implicit-arguments" lsp-metals-show-implicit-arguments t)
    ("metals.show-implicit-conversions-and-classes" lsp-metals-show-implicit-conversions-and-classes t)
-   ("metals.show-inferred-type" lsp-metals-show-inferred-type t)
-   ("metals.remote-language-server" lsp-metals-remote-language-server)))
+   ("metals.enable-indent-on-paste" lsp-metals-enable-indent-on-paste t)
+   ("metals.remote-language-server" lsp-metals-remote-language-server)
+   ("metals.fallback-scala-version" lsp-metals-fallback-scala-version)
+   ("metals.test-user-interface" lsp-metals-test-user-interface)
+   ("metals.java-format.eclipse-config-path" lsp-metals-java-format.eclipse-config-path)
+   ("metals.java-format.eclipse-profile" lsp-metals-java-format.eclipse-profile)
+   ("metals.scala-cli-launcher" lsp-metals-scala-cli-launcher)))
 
 (lsp-dependency
  'coursier
