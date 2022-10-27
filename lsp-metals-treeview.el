@@ -56,6 +56,11 @@
 (require 'lsp-treemacs)
 (require 'lsp-metals-protocol)
 
+;;
+;; treemacs-extensions is obsolete and no longer loaded via treemacs. Consider
+;; changing to treemacs-treelib.
+;;
+(require 'treemacs-extensions)
 
 (defcustom lsp-metals-treeview-logging nil
   "If non nil log treeview trace/debug messages to the 'lsp-log' for debugging."
