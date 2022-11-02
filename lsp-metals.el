@@ -533,6 +533,11 @@ for more information on the metals \"files-decode\" command."
   (interactive)
   (lsp-metals-decode-file lsp-metals--tasty-decoded-format-id))
 
+(defun lsp-metals-run-scalafix ()
+  "Run scalafix rules for the current buffer, requires metals >= v0.11.7."
+  (interactive)
+  (lsp-send-execute-command "scalafix-run" (lsp--text-document-position-params)))
+
 (defun lsp-metals--browse-url (url &rest _)
   "Handle `command:' matals URLs."
   (when-let* ((workspace (lsp-find-workspace 'metals default-directory))
@@ -742,7 +747,6 @@ FOCUSED if there is a focused frame."
                                   (split-string ":")
                                   cl-third
                                   string-to-number))))))
-
 
 (dap-register-debug-provider "scala" #'lsp-metals-populate-config)
 
