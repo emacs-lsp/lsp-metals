@@ -365,7 +365,7 @@ form '((side left))."
         (with-lsp-workspace workspace
           (with-selected-window window
             (set-window-dedicated-p window t)
-            (treemacs-initialize)
+            (treemacs-initialize metals-root)
 
             (setq-local lsp-metals-treeview--current-workspace workspace)
             (setq-local lsp-metals-treeview--view-id view-id)
