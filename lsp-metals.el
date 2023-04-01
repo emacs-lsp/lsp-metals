@@ -354,7 +354,7 @@ sources."
    ("metals.java-format.eclipse-config-path" lsp-metals-java-format.eclipse-config-path)
    ("metals.java-format.eclipse-profile" lsp-metals-java-format.eclipse-profile)
    ("metals.scala-cli-launcher" lsp-metals-scala-cli-launcher)
-   ("metals.enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting)))
+   ("metals.enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting t)))
 
 (lsp-dependency
  'coursier
