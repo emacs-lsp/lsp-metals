@@ -295,6 +295,16 @@ want to use a custom Scala CLI launcher, not available in PATH."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.3"))
 
+(defcustom lsp-metals-enable-semantic-highlighting nil
+  "Use semantic tokens highlight.
+
+When this option is enabled, Metals will provide semantic tokens for clients
+that support it.  The feature is still experimental and does not work for all
+sources."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
 (defcustom lsp-metals-remote-language-server ""
   "A URL pointing to a remote language server."
   :type '(string)
@@ -343,7 +353,8 @@ want to use a custom Scala CLI launcher, not available in PATH."
    ("metals.test-user-interface" lsp-metals-test-user-interface)
    ("metals.java-format.eclipse-config-path" lsp-metals-java-format.eclipse-config-path)
    ("metals.java-format.eclipse-profile" lsp-metals-java-format.eclipse-profile)
-   ("metals.scala-cli-launcher" lsp-metals-scala-cli-launcher)))
+   ("metals.scala-cli-launcher" lsp-metals-scala-cli-launcher)
+   ("metals.enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting)))
 
 (lsp-dependency
  'coursier
