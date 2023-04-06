@@ -386,10 +386,20 @@
 <div class="highlight"><pre><span></span><code><span class="p">(</span><span class="nb">use-package</span> <span class="nv">lsp-metals</span>
   <span class="nb">:ensure</span> <span class="no">t</span>
   <span class="nb">:custom</span>
-  <span class="c1">;; Metals claims to support range formatting by default but it supports range</span>
-  <span class="c1">;; formatting of multiline strings only. You might want to disable it so that</span>
-  <span class="c1">;; emacs can use indentation provided by scala-mode.</span>
-  <span class="p">(</span><span class="nv">lsp-metals-server-args</span> <span class="o">&#39;</span><span class="p">(</span><span class="s">&quot;-J-Dmetals.allow-multiline-string-formatting=off&quot;</span><span class="p">))</span>
+  <span class="c1">;; You might set metals server options via -J arguments. This might not always work, for instance when</span>
+  <span class="c1">;; metals is installed using nix. In this case you can use JAVA_TOOL_OPTIONS environment variable.</span>
+  <span class="p">(</span><span class="nv">lsp-metals-server-args</span> <span class="o">&#39;</span><span class="p">(</span><span class="c1">;; Metals claims to support range formatting by default but it supports range</span>
+                            <span class="c1">;; formatting of multiline strings only. You might want to disable it so that</span>
+                            <span class="c1">;; emacs can use indentation provided by scala-mode.</span>
+                            <span class="s">&quot;-J-Dmetals.allow-multiline-string-formatting=off&quot;</span>
+                            <span class="c1">;; Enable unicode icons. But be warned that emacs might not render unicode</span>
+                            <span class="c1">;; correctly in all cases.</span>
+                            <span class="s">&quot;-J-Dmetals.icons=unicode&quot;</span><span class="p">))</span>
+  <span class="c1">;; In case you want semantic highlighting. This also has to be enabled in lsp-mode using</span>
+  <span class="c1">;; `lsp-semantic-tokens-enable&#39; variable. Also you might want to disable highlighting of modifiers</span>
+  <span class="c1">;; setting `lsp-semantic-tokens-apply-modifiers&#39; to `nil&#39; because metals sends `abstract&#39; modifier</span>
+  <span class="c1">;; which is mapped to `keyword&#39; face.</span>
+  <span class="p">(</span><span class="nv">lsp-metals-enable-semantic-highlighting</span> <span class="no">t</span><span class="p">)</span>
   <span class="nb">:hook</span> <span class="p">(</span><span class="nv">scala-mode</span> <span class="o">.</span> <span class="nv">lsp</span><span class="p">))</span>
 </code></pre></div>
 
