@@ -313,7 +313,7 @@ t."
     (setq lsp-metals-treeview--active-view-workspace nil)
     ;; Only keep this treeview switching hook live when absolutely necessary.
     (lsp-metals-treeview--remove-workspace-switch-hook)
-    (remove-hook 'lsp-after-uninitialized-hook #'lsp-metals-treeview--delete-window)))
+    (remove-hook 'lsp-after-uninitialized-functions #'lsp-metals-treeview--delete-window)))
 
 (defun lsp-metals-treeview--on-workspace-shutdown (workspace)
   "Handler for lsp WORKSPACE shutdown.
@@ -421,7 +421,7 @@ focus."
   (lsp-metals-treeview--add-workspace-switch-hook)
 
   ;; Add hook to close our treeview when the workspace is shutdown.
-  (add-hook 'lsp-after-uninitialized-hook #'lsp-metals-treeview--on-workspace-shutdown))
+  (add-hook 'lsp-after-uninitialized-functions #'lsp-metals-treeview--on-workspace-shutdown))
 
 
 (defun lsp-metals-treeview--cache-add-nodes (metals-nodes current-treemacs-node)
