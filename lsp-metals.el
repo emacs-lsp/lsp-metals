@@ -911,8 +911,6 @@ WORKSPACE is the workspace the client command was received from."
 
 (add-hook 'lsp-after-uninitialized-functions #'lsp-metals--on-workspace-shutdown)
 
-(add-to-list 'lsp-language-id-configuration '(scala-ts-mode . "scala"))
-
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-stdio-connection 'lsp-metals--server-command)
                   :major-modes '(scala-mode scala-ts-mode)
