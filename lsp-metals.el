@@ -913,7 +913,7 @@ WORKSPACE is the workspace the client command was received from."
 
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-stdio-connection 'lsp-metals--server-command)
-                  :major-modes '(scala-mode)
+                  :major-modes '(scala-mode scala-ts-mode)
                   :priority -1
                   :initialization-options '((decorationProvider . t)
                                             (inlineDecorationProvider . t)
