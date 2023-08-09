@@ -2,6 +2,7 @@
 
 ## Master
 * Add reset-choice command.
+* Drop emacs 26 support.
 
 ## 1.1.0
 * Migrate to lsp-protocol.
