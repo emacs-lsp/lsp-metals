@@ -181,7 +181,7 @@ For example, `src/main/scala:: src/main/java::'.  Syntax such as
 (defcustom lsp-metals-bloop-sbt-already-installed nil
   "If true, Metals will not generate a `project/metals.sbt' file.
 This assumes that sbt-bloop is already manually installed in the sbt
-build.  Build import will fail with a 'not valid command bloopInstall`
+build.  Build import will fail with a `not valid command bloopInstall'
 error in case Bloop is not manually installed in the build when using
 this option."
   :type 'boolean
