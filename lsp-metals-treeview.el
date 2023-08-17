@@ -63,13 +63,13 @@
 (require 'treemacs-extensions)
 
 (defcustom lsp-metals-treeview-logging nil
-  "If non nil log treeview trace/debug messages to the 'lsp-log' for debugging."
+  "If non nil log treeview trace/debug messages to the `lsp-log' for debugging."
   :group 'lsp-metals-treeview
   :type 'boolean)
 
 (defcustom lsp-metals-treeview-workspace-switch-delay 0.2
   "Delay in seconds for switching treeview between workspaces.
-The delay occurs after 'buffer-list-update-hook' is called before
+The delay occurs after `buffer-list-update-hook' is called before
 triggering a switch of treeview when navigating between buffers in
 different workspaces."
   :group 'lsp-metals-treeview
@@ -175,7 +175,7 @@ swap the treeview to show the new workspace's treeview."
 
 (defun lsp-metals-treeview--add-workspace-switch-hook ()
   "Add hook to swap treeviews between workspace buffers.
-Add a 'buffer-list-update-hook' to hide/show the active treeview
+Add a `buffer-list-update-hook' to hide/show the active treeview
 - if currently displayed - when the user switches buffers that are
 within another workspace."
   (add-hook 'buffer-list-update-hook
@@ -183,7 +183,7 @@ within another workspace."
 
 (defun lsp-metals-treeview--remove-workspace-switch-hook ()
   "Remove the hook to swap treeviews between workspace buffers.
-Remove the 'buffer-list-update-hook' which deals with switching
+Remove the `buffer-list-update-hook' which deals with switching
 treeview when the active buffer switches between different
 workspaces."
   (remove-hook 'buffer-list-update-hook
@@ -272,7 +272,7 @@ The treeview may not be visible but still exists in the background."
 
 (defun lsp-metals-treeview--get-visibility (workspace)
   "Return visibility status of metals treeview associated with WORKSPACE.
-Return 'visible, 'hidden, 'none depending on state of treeview."
+Return `visible', `hidden', `none' depending on state of treeview."
   (cond
    ((lsp-metals-treeview--visible? workspace) 'visible)
    ((lsp-metals-treeview--exists? workspace)  'hidden)
@@ -319,7 +319,7 @@ t."
   "Handler for lsp WORKSPACE shutdown.
 Ensure we close our treeview windows/buffers.  Under this scenario we
 shouldn't contact Metals to update view visibility status, so we pass
-through workspace-shutdown true so that the 'delete-window' function has
+through workspace-shutdown true so that the `delete-window' function has
 the context of the window closing."
   (lsp-metals-treeview--delete-window workspace t))
 
@@ -332,7 +332,7 @@ the context of the window closing."
   (let ((m (make-sparse-keymap)))
     (define-key m (kbd "q") #'lsp-metals-treeview--hide-window)
     m)
-  "Keymap for 'lsp-metals-treeview-mode'.")
+  "Keymap for `lsp-metals-treeview-mode'.")
 
 (define-minor-mode lsp-metals-treeview-mode
   "LSP Metals Treeview minor mode."
@@ -344,7 +344,7 @@ the context of the window closing."
   "Show or create the side window and treeview.
 The window will be created for the Metals VIEW-ID within the current WORKSPACE.
 The window will be positioned as a side window by POSITION and is of the
-form '((side left))."
+form `((side left))'."
   (let ((buffer-name (lsp-metals-treeview--buffer-name workspace
                                                        (lsp-metals-treeview--view-name view-id))))
     ;; When opening or refreshing the view do temporarily switch focus but restore
@@ -407,7 +407,7 @@ Select the first view/buffer in the treeview window."
   "Display each metals view in our sidebar treeview window.
 Views are displayed for this WORKSPACE.  SLOT is a numeric position starting
 from 0 where the treeview will be positioned relative to the others.  when
-SELECT-TREEVIEW-WINDOW is 't' the treeview window will be selected and have
+SELECT-TREEVIEW-WINDOW is t the treeview window will be selected and have
 focus."
   (lsp-metals-treeview--display-views workspace lsp-metals-treeview-views slot)
 
@@ -574,9 +574,9 @@ do not show an icon."
       (treemacs-as-icon "   " 'face 'font-lock-string-face))))
 
 (defun lsp-metals-treeview--send-execute-command-async (command &optional args)
-  "Create and send a 'workspace/executeCommand'.
+  "Create and send a `workspace/executeCommand'.
 The message will contain the COMMAND and optional ARGS.  Send the
-command asynchronously rather than the default 'lsp-mode' of synchronous."
+command asynchronously rather than the default `lsp-mode' of synchronous."
   (lsp-request-async "workspace/executeCommand"
                      (list :command command
                            :arguments args)
