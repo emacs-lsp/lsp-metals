@@ -323,6 +323,12 @@ sources."
   :type 'string
   :package-version '(lsp-metals . "1.3"))
 
+(defcustom lsp-metals-multi-root t
+  "If non nil, `metals' will be started in multi-root mode."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
 (defface lsp-metals-face-overlay
   '((t :inherit font-lock-comment-face))
   "Face used for metals decoration overlays."
@@ -915,6 +921,7 @@ WORKSPACE is the workspace the client command was received from."
  (make-lsp-client :new-connection (lsp-stdio-connection 'lsp-metals--server-command)
                   :major-modes '(scala-mode scala-ts-mode)
                   :priority -1
+                  :multi-root lsp-metals-multi-root
                   :initialization-options '((decorationProvider . t)
                                             (inlineDecorationProvider . t)
                                             (didFocusProvider . t)
