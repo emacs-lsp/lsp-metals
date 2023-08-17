@@ -638,6 +638,16 @@ WORKSPACE is the workspace the client command was received from."
   (interactive)
   (lsp-send-execute-command "generate-bsp-config" ()))
 
+(defun lsp-metals-zip-reports ()
+  "Create a zip from incognito and bloop reports."
+  (interactive)
+  (lsp-send-execute-command "zip-reports" ()))
+
+(defun lsp-metals-reset-workspace ()
+  "Clean metals cache and restart build server."
+  (interactive)
+  (lsp-send-execute-command "reset-workspace" ()))
+
 (lsp-defun lsp-metals--publish-decorations (workspace (&PublishDecorationsParams :uri :options))
   "Handle the metals/publishDecorations extension notification.
 WORKSPACE is the workspace the notification was received from."
