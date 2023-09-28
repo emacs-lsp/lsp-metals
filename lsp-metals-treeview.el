@@ -554,8 +554,7 @@ one of our icons for the Metals theme and if not display a standard +/-
 if this is an expandable node.  If the node isn't expandable for now
 do not show an icon."
   (-if-let ((&TreeViewNode :icon?) metals-node)
-      (or (treemacs-get-icon-value icon? nil 'Metals)
-          (treemacs-get-icon-value icon? nil lsp-metals-treeview-theme))
+      (treemacs-get-icon-value icon? nil lsp-metals-treeview-theme)
     (if (lsp-get metals-node :collapseState)
         (treemacs-get-icon-value
          (if open-form? 'expanded 'collapsed)
@@ -620,6 +619,7 @@ collapsed or expanded."
 
 (treemacs-create-theme "Metals-dark"
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
+  :extends "Metals"
   :config
   (progn
     (treemacs-create-icon :file "book-dark.png" :extensions ("book"))
@@ -632,6 +632,7 @@ collapsed or expanded."
 
 (treemacs-create-theme "Metals-light"
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
+  :extends "Metals"
   :config
   (progn
     (treemacs-create-icon :file "book-light.png" :extensions ("book"))
