@@ -51,16 +51,10 @@
 (require 'f)
 (require 'seq)
 (require 'pcase)
-(require 'treemacs)
+(require 'treemacs-treelib)
 (require 'lsp-mode)
 (require 'lsp-treemacs)
 (require 'lsp-metals-protocol)
-
-;;
-;; treemacs-extensions is obsolete and no longer loaded via treemacs. Consider
-;; changing to treemacs-treelib.
-;;
-(require 'treemacs-extensions)
 
 (defcustom lsp-metals-treeview-logging nil
   "If non nil log treeview trace/debug messages to the `lsp-log' for debugging."
@@ -98,11 +92,6 @@ Needed to make async calls to the lsp server from treemacs buffers.")
 
 (defvar-local lsp-metals-treeview--view-id nil
   "Metals treeview id associated with the treeview buffer.")
-
-;; Key set on the root of Metals tree - path will be of the form
-;; '(:custom MetalsTree) - initialise our root node and we use this
-;; to find the root node and refresh the tree.
-(defconst lsp-metals-treeview--root-key 'MetalsTree)
 
 (defconst lsp-metals-treeview--icon-dir "icons"
   "Directory containing Metals treeview icon theme.
@@ -354,7 +343,7 @@ form `((side left))'."
         (with-selected-window (display-buffer-in-side-window buffer position)
           ;; update the root of the tree with the view.
           (lsp-metals-treeview--log "Refreshing tree %s" view-id)
-          (treemacs-update-node `(:custom ,lsp-metals-treeview--root-key) t)
+          (treemacs-update-node '(metals-root) t)
           (set-window-dedicated-p (selected-window) t)
           ;; When closing other windows after splitting, prevent our treeview closing.
           (set-window-parameter (selected-window) 'no-delete-other-windows t))
@@ -365,12 +354,26 @@ form `((side left))'."
         (with-lsp-workspace workspace
           (with-selected-window window
             (set-window-dedicated-p window t)
-            (treemacs-initialize)
+            (treemacs-initialize metals-root
+              :and-do (progn
+                        (setq-local lsp-metals-treeview--current-workspace workspace)
+                        (setq-local lsp-metals-treeview--view-id view-id)))
 
-            (setq-local lsp-metals-treeview--current-workspace workspace)
-            (setq-local lsp-metals-treeview--view-id view-id)
-            (treemacs-METALS-ROOT-extension)
-            (setq-local mode-line-format (lsp-metals-treeview--view-name view-id))
+            (setq-local mode-line-format (concat
+                                          ;; Treemacs sets background color for icons explicitly,
+                                          ;; so we can't use it for modeline where background color
+                                          ;; is always changing. So here we just load an image with
+                                          ;; transparency mask.
+                                          (propertize " " 'display (create-image (f-join
+                                                                                  lsp-metals-treeview--dir
+                                                                                  lsp-metals-treeview--icon-dir
+                                                                                  "logo.png")
+                                                                                 nil
+                                                                                 nil
+                                                                                 :ascent 'center
+                                                                                 :mask 'heuristic))
+                                          " "
+                                          (lsp-metals-treeview--view-name view-id)))
 
             ;; Add buffer to list of treeview buffers associated with this workspace.
             (lsp-metals-treeview--add-buffer workspace view-id buffer)
@@ -380,10 +383,7 @@ form `((side left))'."
             (lsp-metals-treeview-mode 1)
 
             ;; Support for link-hint package with default visit action.
-            (setq-local treemacs-default-visit-action 'treemacs-RET-action)
-
-            ;; open root of tree after initialisation.
-            (treemacs-expand-metals-root)))))))
+            (setq-local treemacs-default-visit-action 'treemacs-RET-action)))))))
 
 
 (defun lsp-metals-treeview--display-views (workspace views slot)
@@ -476,7 +476,7 @@ workspace of the project."
                         ;; can be updated directly.
                         (treemacs-update-node (treemacs-button-get tree-node :parent) nil))
                     (lsp-metals-treeview--log "Failed to find node in treeview"))
-                (treemacs-update-node `(:custom ,lsp-metals-treeview--root-key) t)))))
+                (treemacs-update-node '(metals-root) t)))))
         nodes))
 
 
@@ -542,14 +542,6 @@ with values converted from json to hash tables."
         (lsp-metals-treeview--cache-add-nodes children current-tree-node))
       children)))
 
-(defun lsp-metals-treeview--get-children-current-node (&rest _)
-  "Retrieve children of the currently selected node in the treeview.
-See LSP-METALS-TREEVIEW--GET-CHILDREN."
-  (-when-let* ((tree-node (treemacs-node-at-point))
-               (metals-node (treemacs-button-get tree-node :node))
-               ((&TreeViewNode :view-id :node-uri?) metals-node))
-    (lsp-metals-treeview--get-children view-id node-uri?)))
-
 ;;
 ;; UI tree view using treemacs
 ;;
@@ -571,7 +563,7 @@ do not show an icon."
          lsp-treemacs-theme)
 
       ;; leaf node without an icon
-      (treemacs-as-icon "   " 'face 'font-lock-string-face))))
+      "   ")))
 
 (defun lsp-metals-treeview--send-execute-command-async (command &optional args)
   "Create and send a `workspace/executeCommand'.
@@ -615,19 +607,16 @@ collapsed or expanded."
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
   :config
   (progn
-    ;; root icon
-    (treemacs-create-icon :file "logo.png"        :extensions (root)       :fallback "")
-
     ;; symbol icons
-    (treemacs-create-icon :file "method.png"      :extensions ("method"))
-    (treemacs-create-icon :file "class.png"       :extensions ("class"))
-    (treemacs-create-icon :file "object.png"      :extensions ("object"))
-    (treemacs-create-icon :file "enum.png"        :extensions ("enum"))
-    (treemacs-create-icon :file "field.png"       :extensions ("field"))
-    (treemacs-create-icon :file "interface.png"   :extensions ("interface"))
-    (treemacs-create-icon :file "trait.png"       :extensions ("trait"))
-    (treemacs-create-icon :file "val.png"         :extensions ("val"))
-    (treemacs-create-icon :file "var.png"         :extensions ("var"))))
+    (treemacs-create-icon :file "method.png" :extensions ("method"))
+    (treemacs-create-icon :file "class.png" :extensions ("class"))
+    (treemacs-create-icon :file "object.png" :extensions ("object"))
+    (treemacs-create-icon :file "enum.png" :extensions ("enum"))
+    (treemacs-create-icon :file "field.png" :extensions ("field"))
+    (treemacs-create-icon :file "interface.png" :extensions ("interface"))
+    (treemacs-create-icon :file "trait.png" :extensions ("trait"))
+    (treemacs-create-icon :file "val.png" :extensions ("val"))
+    (treemacs-create-icon :file "var.png" :extensions ("var"))))
 
 (treemacs-create-theme "Metals-dark"
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
@@ -653,83 +642,26 @@ collapsed or expanded."
     (treemacs-create-icon :file "twitter-light.png" :extensions ("twitter"))
     (treemacs-create-icon :file "discord-light.png" :extensions ("discord"))))
 
-;;
-;; We can possibly remove the leaf node definition and
-;; replace lsp-metals-treeview--state to return treemacs-metals-node-closed-state
-;;
-(treemacs-define-leaf-node metals-leaf 'dynamic-icon
-
-  :ret-action #'lsp-metals-treeview--exec-node-action
-  :mouse1-action (lambda (&rest args)
-                   (interactive)
-                   (lsp-metals-treeview--exec-node-action args)))
-
-;;
-;; Expandable node definition in the treemacs tree.
-;; Can have an action associated with it - e.g. a class
-;; with goto definition, or be a class that can be expanded
-;; to show fields, functions etc.
-;; Tab expands expandable nodes, return executes the action
-;; on the node - although we will change this in future with
-;; a keymap or hydra interface to allow more actions.
-;;
-
-(treemacs-define-expandable-node metals-node
-  :icon-open-form (lsp-metals-treeview--icon
-                   (treemacs-button-get (treemacs-node-at-point) :node) t)
-  :icon-closed-form (lsp-metals-treeview--icon
-                     (treemacs-button-get (treemacs-node-at-point) :node) nil)
-
-  :query-function (lsp-metals-treeview--get-children-current-node)
-
+(treemacs-define-expandable-node-type metals-node
+  :open-icon (lsp-metals-treeview--icon item t)
+  :closed-icon (lsp-metals-treeview--icon item nil)
+  :label (propertize (lsp-get item :label) 'face font-lock-function-name-face)
+  :key (lsp-get item :nodeUri)
   :ret-action 'lsp-metals-treeview--exec-node-action
+  :children (-when-let* ((node (treemacs-button-get btn :node))
+                         ((&TreeViewNode :view-id :node-uri?) node))
+              (lsp-metals-treeview--get-children view-id node-uri?))
+  :child-type 'metals-node
+  :more-properties `(:node ,item :eldoc ,(lsp-get item :tooltip))
+  :on-expand (lsp-metals-treeview--on-node-collapsed
+              (treemacs-button-get btn :node) nil)
+  :on-collapse (lsp-metals-treeview--on-node-collapsed
+                (treemacs-button-get btn :node) t))
 
-  :after-expand (lsp-metals-treeview--on-node-collapsed
-                 (treemacs-button-get node :node) nil)
-  :after-collapse (lsp-metals-treeview--on-node-collapsed
-                   (treemacs-button-get node :node) t)
-
-  :render-action
-  (treemacs-render-node
-   :icon (lsp-metals-treeview--icon item nil)
-   :label-form (lsp-get item :label)
-   :state treemacs-metals-node-closed-state
-   ;;:state (lsp-metals-treeview--state item)
-   :face 'font-lock-string-face
-   :key-form (lsp-get item :nodeUri)
-   :more-properties (:node item :eldoc (lsp-get item :tooltip))))
-
-;;
-;; Root node of Metals treeview, in the first release this is either the
-;; Build or Compile tree.
-;; Currently disable return action for the root node. Tab expands root nodes
-;; and expandable nodes.
-;;
-
-(treemacs-define-expandable-node metals-root
-  :icon-open (treemacs-get-icon-value 'root nil "Metals")
-  :icon-closed (treemacs-get-icon-value 'root nil "Metals")
-  :query-function (lsp-metals-treeview--get-children lsp-metals-treeview--view-id)
-
-  :render-action
-  (treemacs-render-node
-   :icon (lsp-metals-treeview--icon item nil)
-   :label-form (lsp-get item :label)
-   :state (lsp-metals-treeview--state item)
-   :face 'font-lock-keyword-face
-   :key-form (lsp-get item :nodeUri)
-   :more-properties (:node item :eldoc (lsp-get item :tooltip)))
-  :top-level-marker t
-  :root-label (lsp-metals-treeview--view-name lsp-metals-treeview--view-id)
-  :root-face 'font-lock-type-face
-  :root-key-form lsp-metals-treeview--root-key)
-
-
-(lsp-defun lsp-metals-treeview--state ((&TreeViewNode :collapse-state?))
-  "Return the state of the treeview node."
-  (if collapse-state?
-      treemacs-metals-node-closed-state
-    treemacs-metals-leaf-state))
+(treemacs-define-variadic-entry-node-type metals-root
+  :key 'metals-root
+  :children (lsp-metals-treeview--get-children lsp-metals-treeview--view-id)
+  :child-type 'metals-node)
 
 (defun lsp-metals-treeview (&optional workspace)
   "Display the Metals treeview window for the WORKSPACE (optional).
