@@ -78,7 +78,10 @@ different workspaces."
   :type '(repeat string)
   :package-version '(lsp-metals . "1.2"))
 
-(defcustom lsp-metals-treeview-theme 'Metals-light
+(defcustom lsp-metals-treeview-theme
+  (pcase (frame-parameter nil 'background-mode)
+    ('dark 'Metals-dark)
+    (_ 'Metals-light))
   "The theme for treeview icons."
   :group 'lsp-metals-treeview
   :type '(choice
