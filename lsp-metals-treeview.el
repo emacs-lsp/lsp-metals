@@ -656,7 +656,13 @@ collapsed or expanded."
                          ((&TreeViewNode :view-id :node-uri?) node))
               (lsp-metals-treeview--get-children view-id node-uri?))
   :child-type 'metals-node
-  :more-properties `(:node ,item :eldoc ,(lsp-get item :tooltip))
+  :more-properties `(:node
+                     ,item
+                     ;; TODO: this is not used anymore
+                     :eldoc
+                     ,(lsp-get item :tooltip)
+                     :leaf
+                     ,(not (lsp-get item :collapseState)))
   :on-expand (lsp-metals-treeview--on-node-collapsed
               (treemacs-button-get btn :node) nil)
   :on-collapse (lsp-metals-treeview--on-node-collapsed
