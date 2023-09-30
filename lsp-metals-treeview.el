@@ -649,7 +649,7 @@ collapsed or expanded."
 (treemacs-define-expandable-node-type metals-node
   :open-icon (lsp-metals-treeview--icon item t)
   :closed-icon (lsp-metals-treeview--icon item nil)
-  :label (propertize (lsp-get item :label) 'face 'default)
+  :label (propertize (lsp-get item :label) 'face 'default 'help-echo (lsp-get item :tooltip))
   :key (lsp-get item :nodeUri)
   :ret-action 'lsp-metals-treeview--exec-node-action
   :children (-when-let* ((node (treemacs-button-get btn :node))
@@ -658,9 +658,6 @@ collapsed or expanded."
   :child-type 'metals-node
   :more-properties `(:node
                      ,item
-                     ;; TODO: this is not used anymore
-                     :eldoc
-                     ,(lsp-get item :tooltip)
                      :leaf
                      ,(not (lsp-get item :collapseState)))
   :on-expand (lsp-metals-treeview--on-node-collapsed
