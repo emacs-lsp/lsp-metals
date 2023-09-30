@@ -556,8 +556,9 @@ node is expanding based on OPEN-FORM? being True.  Check if icon matches
 one of our icons for the Metals theme and if not display a standard +/-
 if this is an expandable node.  If the node isn't expandable for now
 do not show an icon."
-  (-if-let ((&TreeViewNode :icon?) metals-node)
-      (treemacs-get-icon-value icon? nil lsp-metals-treeview-theme)
+  (-if-let* (((&TreeViewNode :icon?) metals-node)
+             (icon (treemacs-get-icon-value icon? nil lsp-metals-treeview-theme)))
+      icon
     (if (lsp-get metals-node :collapseState)
         (treemacs-get-icon-value
          (if open-form? 'expanded 'collapsed)
