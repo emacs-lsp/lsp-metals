@@ -618,7 +618,8 @@ collapsed or expanded."
     (treemacs-create-icon :file "interface.png" :extensions ("interface"))
     (treemacs-create-icon :file "trait.png" :extensions ("trait"))
     (treemacs-create-icon :file "val.png" :extensions ("val"))
-    (treemacs-create-icon :file "var.png" :extensions ("var"))))
+    (treemacs-create-icon :file "var.png" :extensions ("var"))
+    (treemacs-create-icon :file "doctor.png" :extensions ("doctor"))))
 
 (treemacs-create-theme "Metals-dark"
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
@@ -631,7 +632,17 @@ collapsed or expanded."
     (treemacs-create-icon :file "gitter-dark.png" :extensions ("gitter"))
     (treemacs-create-icon :file "issue-opened-dark.png" :extensions ("issue-opened"))
     (treemacs-create-icon :file "twitter-dark.png" :extensions ("twitter"))
-    (treemacs-create-icon :file "discord-dark.png" :extensions ("discord"))))
+    (treemacs-create-icon :file "discord-dark.png" :extensions ("discord"))
+    (treemacs-create-icon :file "cancel-dark.png" :extensions ("cancel"))
+    (treemacs-create-icon :file "cascade-dark.png" :extensions ("cascade"))
+    (treemacs-create-icon :file "clean-all-dark.png" :extensions ("clean-all"))
+    (treemacs-create-icon :file "clean-dark.png" :extensions ("clean"))
+    (treemacs-create-icon :file "compile-dark.png" :extensions ("compile"))
+    (treemacs-create-icon :file "connect-dark.png" :extensions ("connect"))
+    (treemacs-create-icon :file "exception-dark.png" :extensions ("exception"))
+    (treemacs-create-icon :file "focus-dark.png" :extensions ("focus"))
+    (treemacs-create-icon :file "info-dark.png" :extensions ("info"))
+    (treemacs-create-icon :file "location-dark.png" :extensions ("location"))))
 
 (treemacs-create-theme "Metals-light"
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
@@ -644,7 +655,17 @@ collapsed or expanded."
     (treemacs-create-icon :file "gitter-light.png" :extensions ("gitter"))
     (treemacs-create-icon :file "issue-opened-light.png" :extensions ("issue-opened"))
     (treemacs-create-icon :file "twitter-light.png" :extensions ("twitter"))
-    (treemacs-create-icon :file "discord-light.png" :extensions ("discord"))))
+    (treemacs-create-icon :file "discord-light.png" :extensions ("discord"))
+    (treemacs-create-icon :file "cancel-light.png" :extensions ("cancel"))
+    (treemacs-create-icon :file "cascade-light.png" :extensions ("cascade"))
+    (treemacs-create-icon :file "clean-all-light.png" :extensions ("clean-all"))
+    (treemacs-create-icon :file "clean-light.png" :extensions ("clean"))
+    (treemacs-create-icon :file "compile-light.png" :extensions ("compile"))
+    (treemacs-create-icon :file "connect-light.png" :extensions ("connect"))
+    (treemacs-create-icon :file "exception-light.png" :extensions ("exception"))
+    (treemacs-create-icon :file "focus-light.png" :extensions ("focus"))
+    (treemacs-create-icon :file "info-light.png" :extensions ("info"))
+    (treemacs-create-icon :file "location-light.png" :extensions ("location"))))
 
 (treemacs-define-expandable-node-type metals-node
   :open-icon (lsp-metals-treeview--icon item t)
