@@ -649,7 +649,7 @@ collapsed or expanded."
 (treemacs-define-expandable-node-type metals-node
   :open-icon (lsp-metals-treeview--icon item t)
   :closed-icon (lsp-metals-treeview--icon item nil)
-  :label (propertize (lsp-get item :label) 'face font-lock-function-name-face)
+  :label (propertize (lsp-get item :label) 'face 'default)
   :key (lsp-get item :nodeUri)
   :ret-action 'lsp-metals-treeview--exec-node-action
   :children (-when-let* ((node (treemacs-button-get btn :node))
