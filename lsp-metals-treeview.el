@@ -385,8 +385,9 @@ form `((side left))'."
             (set-window-parameter window 'no-delete-other-windows t)
             (lsp-metals-treeview-mode 1)
 
-            ;; Support for link-hint package with default visit action.
-            (setq-local treemacs-default-visit-action 'treemacs-RET-action)))))))
+            (setq-local treemacs-default-visit-action 'treemacs-RET-action)
+            (setq-local treemacs-doubleclick-actions-config '((treemacs-metals-node-open . treemacs-RET-action)
+                                                              (treemacs-metals-node-closed . treemacs-RET-action)))))))))
 
 
 (defun lsp-metals-treeview--display-views (workspace views slot)
