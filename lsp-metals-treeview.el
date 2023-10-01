@@ -616,10 +616,9 @@ collapsed or expanded."
 
 ;;
 ;; Icon theme for Metals treeview
-;; Icons taken from vs code Metals code - although Metals draws letters on
-;; the icons to indicate Class (C), method(M) etc. Would be nice to redesign
-;; these in the future.
+;; Icons are partially taken from VSCode and partially from Metals:
 ;;   https://github.com/scalameta/metals-vscode/tree/master/icons
+;;   https://github.com/microsoft/vscode-codicons/tree/main/src/icons
 ;;
 (treemacs-create-theme "Metals"
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
@@ -658,7 +657,11 @@ collapsed or expanded."
     (treemacs-create-icon :file "exception-dark.png" :extensions ("exception"))
     (treemacs-create-icon :file "focus-dark.png" :extensions ("focus"))
     (treemacs-create-icon :file "info-dark.png" :extensions ("info"))
-    (treemacs-create-icon :file "location-dark.png" :extensions ("location"))))
+    (treemacs-create-icon :file "location-dark.png" :extensions ("location"))
+    (treemacs-create-icon :file "empty-window-dark.png" :extensions ("empty-window"))
+    (treemacs-create-icon :file "sync-dark.png" :extensions ("sync"))
+    (treemacs-create-icon :file "debug-stop-dark.png" :extensions ("debug-stop"))
+    (treemacs-create-icon :file "close-dark.png" :extensions ("notifications-clear"))))
 
 (treemacs-create-theme "Metals-light"
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
@@ -681,7 +684,11 @@ collapsed or expanded."
     (treemacs-create-icon :file "exception-light.png" :extensions ("exception"))
     (treemacs-create-icon :file "focus-light.png" :extensions ("focus"))
     (treemacs-create-icon :file "info-light.png" :extensions ("info"))
-    (treemacs-create-icon :file "location-light.png" :extensions ("location"))))
+    (treemacs-create-icon :file "location-light.png" :extensions ("location"))
+    (treemacs-create-icon :file "empty-window-light.png" :extensions ("empty-window"))
+    (treemacs-create-icon :file "sync-light.png" :extensions ("sync"))
+    (treemacs-create-icon :file "debug-stop-light.png" :extensions ("debug-stop"))
+    (treemacs-create-icon :file "close-light.png" :extensions ("notifications-clear"))))
 
 (treemacs-define-expandable-node-type metals-node
   :open-icon (lsp-metals-treeview--icon item t)
