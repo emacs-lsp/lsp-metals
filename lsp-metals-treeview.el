@@ -549,6 +549,16 @@ with values converted from json to hash tables."
 ;; UI tree view using treemacs
 ;;
 
+(defun lsp-metals-treeview--xpm-pad (width)
+  "Return an XPM image with the specified WIDTH."
+  (format "/* XPM */
+static char * pad_xpm[] = {
+\"%d 1 1 1\",
+\". c none\",
+\"%s\"
+};
+" width (make-string width ?.)))
+
 (defun lsp-metals-treeview--icon (metals-node open-form?)
   "Return icon based on METALS-NODE.
 The icon will depend on the individual METALS-NODE and whether the
@@ -566,7 +576,11 @@ do not show an icon."
          lsp-treemacs-theme)
 
       ;; leaf node without an icon
-      "   ")))
+      (concat (propertize " " 'display (create-image
+                                        (lsp-metals-treeview--xpm-pad treemacs--icon-size)
+                                        'xpm t
+                                        :mask 'heuristic))
+              " "))))
 
 (defun lsp-metals-treeview--send-execute-command-async (command &optional args)
   "Create and send a `workspace/executeCommand'.
