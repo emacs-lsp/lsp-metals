@@ -363,19 +363,7 @@ form `((side left))'."
                         (setq-local lsp-metals-treeview--view-id view-id)))
 
             (setq-local mode-line-format (concat
-                                          ;; Treemacs sets background color for icons explicitly,
-                                          ;; so we can't use it for modeline where background color
-                                          ;; is always changing. So here we just load an image with
-                                          ;; transparency mask.
-                                          (propertize " " 'display (create-image (f-join
-                                                                                  lsp-metals-treeview--dir
-                                                                                  lsp-metals-treeview--icon-dir
-                                                                                  "logo.png")
-                                                                                 nil
-                                                                                 nil
-                                                                                 :ascent 'center
-                                                                                 :mask 'heuristic))
-                                          " "
+                                          (treemacs-get-icon-value 'root nil "Metals")
                                           (lsp-metals-treeview--view-name view-id)))
 
             ;; Add buffer to list of treeview buffers associated with this workspace.
@@ -624,7 +612,7 @@ collapsed or expanded."
   :icon-directory (f-join lsp-metals-treeview--dir lsp-metals-treeview--icon-dir)
   :config
   (progn
-    ;; symbol icons
+    (treemacs-create-icon :file "logo.png" :extensions (root))
     (treemacs-create-icon :file "method.png" :extensions ("method"))
     (treemacs-create-icon :file "class.png" :extensions ("class"))
     (treemacs-create-icon :file "object.png" :extensions ("object"))
