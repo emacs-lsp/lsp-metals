@@ -648,6 +648,16 @@ WORKSPACE is the workspace the client command was received from."
   (interactive)
   (lsp-send-execute-command "reset-workspace" ()))
 
+(defun lsp-metals-open-server-log ()
+  "Open a buffer with the metals log for the current workspace."
+  (interactive)
+  (if-let ((root (lsp-workspace-root)))
+      (if-let* ((log-file (f-join (file-name-as-directory root) ".metals" "metals.log"))
+                ((f-exists-p log-file)))
+          (progn (find-file log-file) (goto-char (point-max)))
+        (user-error "%s does not exist, are you in the right directory?" log-file))
+    (user-error "No LSP workspace is in effect")))
+
 (lsp-defun lsp-metals--publish-decorations (workspace (&PublishDecorationsParams :uri :options))
   "Handle the metals/publishDecorations extension notification.
 WORKSPACE is the workspace the notification was received from."
