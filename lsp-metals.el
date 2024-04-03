@@ -3,7 +3,7 @@
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "27.1") (scala-mode "1.1") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.18.0") (f "0.20.0") (ht "2.0") (treemacs "3.1") (posframe "1.4.1"))
+;; Package-Requires: ((emacs "27.1") (scala-mode "0.23") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.18.0") (f "0.20.0") (ht "2.0") (treemacs "3.1") (posframe "1.4.1"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>
 ;;         Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
