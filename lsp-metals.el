@@ -593,12 +593,14 @@ for more information on the metals \"files-decode\" command."
   "Generate doctor buffer name for the WORKSPACE."
   (format "*Metals Doctor: %s*" (process-id (lsp--workspace-cmd-proc workspace))))
 
-(defun lsp-metals--doctor-run (workspace html)
+(defun lsp-metals--doctor-run (workspace &optional html?)
   "Focus on a window displaying troubleshooting help from the Metals doctor.
 HTML is the help contents.
 WORKSPACE is the workspace the client command was received from."
-  (pop-to-buffer (lsp-metals--generate-doctor-buffer-name workspace))
-  (lsp-metals--render-html html))
+  (if (not html?)
+      (lsp-send-execute-command "doctor-run" ())
+    (pop-to-buffer (lsp-metals--generate-doctor-buffer-name workspace))
+    (lsp-metals--render-html html?)))
 
 (defun lsp-metals--doctor-reload (workspace html)
   "Reload the HTML contents of an open Doctor window, if any.
