@@ -251,7 +251,7 @@ Metals will try to adjust the indentation to that of the current cursor."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.3"))
 
-(defcustom lsp-metals-fallback-scala-version "3.2.0"
+(defcustom lsp-metals-fallback-scala-version "3.3.3"
   "The Scala compiler version that is used as the default or fallback.
 Used when a file doesn't belong to any build target or the specified Scala
 version isn't supported by Metals.  This applies to standalone Scala files,
