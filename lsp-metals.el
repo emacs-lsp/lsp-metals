@@ -3,7 +3,7 @@
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
 ;; Version: 1.0.0
-;; Package-Requires: ((emacs "27.1") (scala-mode "0.23") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.18.0") (f "0.20.0") (ht "2.0") (treemacs "3.1") (posframe "1.4.1"))
+;; Package-Requires: ((emacs "27.1") (scala-mode "0.23") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.18.0") (f "0.20.0") (ht "2.0") (treemacs "3.1"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>
 ;;         Evgeny Kurnevsky <kurnevsky@gmail.com>
 ;; Keywords: languages, extensions
@@ -310,18 +310,6 @@ sources."
   :type '(string)
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.0"))
-
-(defcustom lsp-metals-slow-task-frame-border-width 1
-  "Border width of the slow task frame."
-  :group 'lsp-metals
-  :type 'natnum
-  :package-version '(lsp-metals . "1.3"))
-
-(defcustom lsp-metals-slow-task-frame-border-color "white"
-  "Border color of the slow task frame."
-  :group 'lsp-metals
-  :type 'string
-  :package-version '(lsp-metals . "1.3"))
 
 (defcustom lsp-metals-multi-root t
   "If non nil, `metals' will be started in multi-root mode."
@@ -876,69 +864,6 @@ WORKSPACE is the workspace we received notification from."
   "Provide a string value for a given prompt."
   (list :value (read-from-minibuffer (concat prompt ": "))))
 
-(defun lsp-metals--slow-task-buffer-name (workspace)
-  "Generate slow task buffer name for the WORKSPACE."
-  (format " *Metals Slow Task: %s*" (process-id (lsp--workspace-cmd-proc workspace))))
-
-(defun lsp-metals--slow-task-press (workspace callback cancel _)
-  "CANCEL slow task or close its frame in the WORKSPACE using CALLBACK."
-  (funcall callback (list :cancel (or cancel :json-false)))
-  (posframe-hide (lsp-metals--slow-task-buffer-name workspace)))
-
-;; Copied from button.el, should be replaced by native `button-buttonize'
-;; when we drop support for emacs 26 and 27.
-(defun lsp-metals--button-buttonize (string callback &optional data)
-  "Make STRING into a button and return it.
-When clicked, CALLBACK will be called with the DATA as the
-function argument.  If DATA isn't present (or is nil), the button
-itself will be used instead as the function argument."
-  (propertize string
-              'face 'button
-              'button t
-              'follow-link t
-              'category t
-              'button-data data
-              'keymap button-map
-              'action callback))
-
-(defun lsp-metals--slow-task-text (workspace message callback)
-  "Generate a buffer text for slow task with MESSAGE.
-CALLBACK is a function that sends user action to metals.
-WORKSPACE is the workspace we received notification from."
-  (let* ((text (format "Metals: %s" message))
-         (button (lambda (text cancel)
-                   (lsp-metals--button-buttonize (propertize text 'pointer 'hand)
-                                                 (-partial #'lsp-metals--slow-task-press workspace callback cancel))))
-         (cancel (funcall button "cancel" t))
-         (close (funcall button "close" nil)))
-    (concat text
-            "\n"
-            cancel
-            (make-string (max 1 (- (string-width text) (string-width cancel) (string-width close))) ?\s)
-            close)))
-
-(lsp-defun lsp-metals--slow-task (workspace (&MetalsSlowTaskParams :message) callback)
-  "Handle the metals/slowTask extension notification."
-  (when (posframe-workable-p)
-    (posframe-show (lsp-metals--slow-task-buffer-name workspace)
-                   :string (lsp-metals--slow-task-text workspace message callback)
-                   :poshandler 'posframe-poshandler-frame-bottom-right-corner
-                   :border-width lsp-metals-slow-task-frame-border-width
-                   :border-color lsp-metals-slow-task-frame-border-color)))
-
-(defun lsp-metals--cancel-request (workspace _)
-  "Cancel request that indicates that the slow task has completed.
-WORKSPACE is the workspace the client command was received from."
-  (when (posframe-workable-p)
-    (posframe-hide (lsp-metals--slow-task-buffer-name workspace))))
-
-(defun lsp-metals--on-workspace-shutdown (workspace)
-  "Delete slow task posframe pertaining to the WORKSPACE."
-  (when (posframe-workable-p)
-    (posframe-delete (lsp-metals--slow-task-buffer-name workspace))))
-
-(add-hook 'lsp-after-uninitialized-functions #'lsp-metals--on-workspace-shutdown)
-
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-stdio-connection 'lsp-metals--server-command)
                   :major-modes '(scala-mode scala-ts-mode)
@@ -950,7 +875,6 @@ WORKSPACE is the workspace the client command was received from."
                                             (executeClientCommandProvider . t)
                                             (doctorProvider . "html")
                                             (statusBarProvider . "on")
-                                            (slowTaskProvider . t)
                                             (debuggingProvider . t)
                                             (treeViewProvider . t)
                                             (quickPickProvider . t)
@@ -960,11 +884,9 @@ WORKSPACE is the workspace the client command was received from."
                                              ("metals/publishDecorations" #'lsp-metals--publish-decorations)
                                              ("metals/treeViewDidChange" #'lsp-metals-treeview--did-change)
                                              ("metals-model-refresh" #'lsp-metals--model-refresh)
-                                             ("metals/status" #'lsp-metals--status-string)
-                                             ("$/cancelRequest" #'lsp-metals--cancel-request))
+                                             ("metals/status" #'lsp-metals--status-string))
                   :request-handlers (ht ("metals/quickPick" #'lsp-metals--quick-pick)
                                         ("metals/inputBox" #'lsp-metals--input-box))
-                  :async-request-handlers (ht ("metals/slowTask" #'lsp-metals--slow-task))
                   :action-handlers (ht ("metals-debug-session-start" (-partial #'lsp-metals--debug-start :json-false))
                                        ("metals-run-session-start" (-partial #'lsp-metals--debug-start t)))
                   :server-id 'metals
