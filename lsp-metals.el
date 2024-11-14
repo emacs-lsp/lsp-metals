@@ -209,30 +209,6 @@ speed up document processing."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.0"))
 
-(defcustom lsp-metals-show-implicit-arguments nil
-  "If True, implicit argument annotations will be shown.
-When this option is enabled, each method that has implicit arguments has them
-displayed either as additional decorations."
-  :type 'boolean
-  :group 'lsp-metals
-  :package-version '(lsp-metals . "1.2"))
-
-(defcustom lsp-metals-show-implicit-conversions-and-classes nil
-  "If True, implicit conversions and classes will be shown.
-When this option is enabled, each place where an implicit method or class is
-used has it displayed either as additional decorations."
-  :type 'boolean
-  :group 'lsp-metals
-  :package-version '(lsp-metals . "1.2"))
-
-(defcustom lsp-metals-show-inferred-type nil
-  "If True, inferred type annotations will be shown.
-When this option is enabled, each method that can have inferred types has them
-displayed either as additional decorations."
-  :type 'boolean
-  :group 'lsp-metals
-  :package-version '(lsp-metals . "1.2"))
-
 (defcustom lsp-metals-ammonite-jvm-properties nil
   "Optional vector of JVM properties to pass along to the Ammonite server.
 Each property needs to be a separate item.
@@ -305,6 +281,51 @@ sources."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.3"))
 
+(defcustom lsp-metals-inlay-hints-enable-inferred-types nil
+  "Should display type annotations for inferred types.
+
+When this option is enabled, each method that can have inferred types has them
+displayed either as additional decorations."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-inlay-hints-enable-implicit-conversions nil
+  "Should display implicit conversion at usage sites.
+
+When this option is enabled, each place where an implicit method or class is
+used has it displayed either as additional decorations."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-inlay-hints-enable-implicit-arguments nil
+  "Should display implicit parameter at usage sites.
+
+When this option is enabled, each method that has implicit arguments has them
+displayed either as additional decorations."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-inlay-hints-enable-type-parameters nil
+  "Should display type annotations for type parameters.
+
+When this option is enabled, each place when a type parameter is applied has it
+displayed either as additional decorations."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
+(defcustom lsp-metals-inlay-hints-enable-hints-in-pattern-match nil
+  "Should display type annotations in pattern matches.
+
+When this option is enabled, each place when a type is inferred in a pattern
+match has it displayed either as additional decorations."
+  :type 'boolean
+  :group 'lsp-metals
+  :package-version '(lsp-metals . "1.3"))
+
 (defcustom lsp-metals-remote-language-server ""
   "A URL pointing to a remote language server."
   :type '(string)
@@ -350,9 +371,6 @@ sources."
    ("metals.bloop-sbt-already-installed" lsp-metals-bloop-sbt-already-installed t)
    ("metals.bloop-version" lsp-metals-bloop-version)
    ("metals.super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled t)
-   ("metals.show-inferred-type" lsp-metals-show-inferred-type t)
-   ("metals.show-implicit-arguments" lsp-metals-show-implicit-arguments t)
-   ("metals.show-implicit-conversions-and-classes" lsp-metals-show-implicit-conversions-and-classes t)
    ("metals.enable-indent-on-paste" lsp-metals-enable-indent-on-paste t)
    ("metals.remote-language-server" lsp-metals-remote-language-server)
    ("metals.fallback-scala-version" lsp-metals-fallback-scala-version)
@@ -360,7 +378,12 @@ sources."
    ("metals.java-format.eclipse-config-path" lsp-metals-java-format.eclipse-config-path)
    ("metals.java-format.eclipse-profile" lsp-metals-java-format.eclipse-profile)
    ("metals.scala-cli-launcher" lsp-metals-scala-cli-launcher)
-   ("metals.enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting t)))
+   ("metals.enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting t)
+   ("inlay-hints.inferredTypes.enabled" lsp-metals-inlay-hints-enable-inferred-types t)
+   ("inlay-hints.implicitConversions.enabled" lsp-metals-inlay-hints-enable-implicit-conversions t)
+   ("inlay-hints.implicitArguments.enabled" lsp-metals-inlay-hints-enable-implicit-arguments t)
+   ("inlay-hints.typeParameters.enabled" lsp-metals-inlay-hints-enable-type-parameters t)
+   ("inlay-hints.hintsInPatternMatch.enabled" lsp-metals-inlay-hints-enable-hints-in-pattern-match t)))
 
 (lsp-dependency
  'coursier
@@ -913,11 +936,13 @@ configuration name.  VAR is the variable holding the value of the configuration.
       (let ((status (if ,var "on" "off")))
         (lsp--info "Turned %s %s" status ,name)))))
 
-(lsp-metals--create-bool-toggle "show-inferred-type" "show-inferred-type" lsp-metals-show-inferred-type)
-(lsp-metals--create-bool-toggle "show-implicit-arguments" "show-implicit-arguments" lsp-metals-show-implicit-arguments)
 (lsp-metals--create-bool-toggle "show-super-method-lenses" "super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled)
-(lsp-metals--create-bool-toggle "show-implicit-conversions" "show-implicit-conversions-and-classes" lsp-metals-show-implicit-conversions-and-classes)
 (lsp-metals--create-bool-toggle "enable-semantic-highlighting" "enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-inferred-types" "inlay-hints.inferredTypes.enabled" lsp-metals-inlay-hints-enable-inferred-types)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-implicit-conversions" "inlay-hints.implicitConversions.enabled" lsp-metals-inlay-hints-enable-implicit-conversions)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-implicit-arguments" "inlay-hints.implicitArguments.enabled" lsp-metals-inlay-hints-enable-implicit-arguments)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-type-parameters" "inlay-hints.typeParameters.enabled" lsp-metals-inlay-hints-enable-type-parameters)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-hints-in-pattern-match" "inlay-hints.hintsInPatternMatch.enabled" lsp-metals-inlay-hints-enable-hints-in-pattern-match)
 
 (provide 'lsp-metals)
 ;;; lsp-metals.el ends here
