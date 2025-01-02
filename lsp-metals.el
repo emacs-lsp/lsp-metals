@@ -379,11 +379,11 @@ match has it displayed either as additional decorations."
    ("metals.java-format.eclipse-profile" lsp-metals-java-format.eclipse-profile)
    ("metals.scala-cli-launcher" lsp-metals-scala-cli-launcher)
    ("metals.enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting t)
-   ("inlay-hints.inferredTypes.enabled" lsp-metals-inlay-hints-enable-inferred-types t)
-   ("inlay-hints.implicitConversions.enabled" lsp-metals-inlay-hints-enable-implicit-conversions t)
-   ("inlay-hints.implicitArguments.enabled" lsp-metals-inlay-hints-enable-implicit-arguments t)
-   ("inlay-hints.typeParameters.enabled" lsp-metals-inlay-hints-enable-type-parameters t)
-   ("inlay-hints.hintsInPatternMatch.enabled" lsp-metals-inlay-hints-enable-hints-in-pattern-match t)))
+   ("inlay-hints.inferredTypes.enable" lsp-metals-inlay-hints-enable-inferred-types t)
+   ("inlay-hints.implicitConversions.enable" lsp-metals-inlay-hints-enable-implicit-conversions t)
+   ("inlay-hints.implicitArguments.enable" lsp-metals-inlay-hints-enable-implicit-arguments t)
+   ("inlay-hints.typeParameters.enable" lsp-metals-inlay-hints-enable-type-parameters t)
+   ("inlay-hints.hintsInPatternMatch.enable" lsp-metals-inlay-hints-enable-hints-in-pattern-match t)))
 
 (lsp-dependency
  'coursier
@@ -938,11 +938,11 @@ configuration name.  VAR is the variable holding the value of the configuration.
 
 (lsp-metals--create-bool-toggle "show-super-method-lenses" "super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled)
 (lsp-metals--create-bool-toggle "enable-semantic-highlighting" "enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting)
-(lsp-metals--create-bool-toggle "inlay-hints-enable-inferred-types" "inlay-hints.inferredTypes.enabled" lsp-metals-inlay-hints-enable-inferred-types)
-(lsp-metals--create-bool-toggle "inlay-hints-enable-implicit-conversions" "inlay-hints.implicitConversions.enabled" lsp-metals-inlay-hints-enable-implicit-conversions)
-(lsp-metals--create-bool-toggle "inlay-hints-enable-implicit-arguments" "inlay-hints.implicitArguments.enabled" lsp-metals-inlay-hints-enable-implicit-arguments)
-(lsp-metals--create-bool-toggle "inlay-hints-enable-type-parameters" "inlay-hints.typeParameters.enabled" lsp-metals-inlay-hints-enable-type-parameters)
-(lsp-metals--create-bool-toggle "inlay-hints-enable-hints-in-pattern-match" "inlay-hints.hintsInPatternMatch.enabled" lsp-metals-inlay-hints-enable-hints-in-pattern-match)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-inferred-types" "inlay-hints.inferredTypes.enable" lsp-metals-inlay-hints-enable-inferred-types)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-implicit-conversions" "inlay-hints.implicitConversions.enable" lsp-metals-inlay-hints-enable-implicit-conversions)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-implicit-arguments" "inlay-hints.implicitArguments.enable" lsp-metals-inlay-hints-enable-implicit-arguments)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-type-parameters" "inlay-hints.typeParameters.enable" lsp-metals-inlay-hints-enable-type-parameters)
+(lsp-metals--create-bool-toggle "inlay-hints-enable-hints-in-pattern-match" "inlay-hints.hintsInPatternMatch.enable" lsp-metals-inlay-hints-enable-hints-in-pattern-match)
 
 (provide 'lsp-metals)
 ;;; lsp-metals.el ends here
