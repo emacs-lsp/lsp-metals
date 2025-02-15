@@ -1,6 +1,6 @@
 (package "lsp-metals"
          "1.0.0"
-         "Scala Client settings ")
+         "Scala Client settings")
 
 (website-url "https://github.com/emacs-lsp/lsp-metals")
 (keywords "languages" "extensions")
