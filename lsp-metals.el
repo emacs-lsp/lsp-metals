@@ -731,41 +731,11 @@ WORKSPACE is the workspace the notification was received from."
 (defvar lsp-metals--current-buffer nil
   "Current buffer used to send `metals/didFocusTextDocument' notification.")
 
-(defun lsp-metals--window-state-did-change (focused)
-  "Send `metals/windowStateDidChange' notification on frames focus change.
-FOCUSED if there is a focused frame."
-  (lsp-notify "metals/windowStateDidChange" `((focused . ,focused))))
-
 (defun lsp-metals--workspaces ()
   "Get the list of all metals workspaces."
   (--filter
    (eq (lsp--client-server-id (lsp--workspace-client it)) 'metals)
    (lsp--session-workspaces (lsp-session))))
-
-(defmacro lsp-metals--add-focus-hooks ()
-  "Add hooks for `metals/windowStateDidChange' notification."
-  (if (boundp 'after-focus-change-function)
-      `(progn
-         (defun lsp-metals--handle-focus-change ()
-           "Send `metals/windowStateDidChange' notification on frames focus change."
-           (let ((focused (if (and (fboundp 'frame-focus-state) (frame-focus-state)) t :json-false)))
-             (--each (lsp-metals--workspaces)
-               (with-lsp-workspace it
-                 (lsp-metals--window-state-did-change focused)))))
-         (add-function :after after-focus-change-function 'lsp-metals--handle-focus-change))
-    `(progn
-       (defun lsp-metals--focus-in-hook ()
-         "Send `metals/windowStateDidChange' notification when a frame gains focus."
-         (--each (lsp-metals--workspaces)
-           (with-lsp-workspace it
-             (lsp-metals--window-state-did-change t))))
-       (add-hook 'focus-in-hook 'lsp-metals--focus-in-hook)
-       (defun lsp-metals--focus-out-hook ()
-         "Send `metals/windowStateDidChange' notification when all frames lost focus."
-         (--each (lsp-metals--workspaces)
-           (with-lsp-workspace it
-             (lsp-metals--window-state-did-change :json-false))))
-       (add-hook 'focus-out-hook 'lsp-metals--focus-out-hook))))
 
 (defun lsp-metals--did-focus ()
   "Send `metals/didFocusTextDocument' on buffer switch."
@@ -912,7 +882,6 @@ WORKSPACE is the workspace we received notification from."
                                        ("metals-run-session-start" (-partial #'lsp-metals--debug-start t)))
                   :server-id 'metals
                   :initialized-fn (lambda (workspace)
-                                    (lsp-metals--add-focus-hooks)
                                     (with-lsp-workspace workspace
                                       (lsp--set-configuration
                                        (lsp-configuration-section "metals"))))
