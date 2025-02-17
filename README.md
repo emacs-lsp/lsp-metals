@@ -1,7 +1,7 @@
 [![MELPA](https://melpa.org/packages/lsp-metals-badge.svg)](https://melpa.org/#/lsp-metals)
 [![MELPA Stable](https://stable.melpa.org/packages/lsp-metals-badge.svg)](https://stable.melpa.org/#/lsp-metals)
-
 <a><img align="right" width="12%" alt="metals_logo" src="images/logo.png"></a>
+
 # lsp-metals
 
 [![CI](https://github.com/emacs-lsp/lsp-metals/workflows/CI/badge.svg)](https://github.com/emacs-lsp/lsp-metals/actions)
