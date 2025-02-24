@@ -463,12 +463,12 @@ Will invoke CALLBACK on success, ERROR-CALLBACK on error."
 (defun lsp-metals-new-scala-file ()
   "Create a new file either a class, object, trait, package object or worksheet."
   (interactive)
-  (lsp--send-execute-command "new-scala-file" (concat "file://" default-directory)))
+  (lsp-send-execute-command "new-scala-file" (concat "file://" default-directory)))
 
 (defun lsp-metals-new-scala-project ()
   "Create a new Scala project using one of the available g8 templates."
   (interactive)
-  (lsp--send-execute-command "new-scala-project"))
+  (lsp-send-execute-command "new-scala-project"))
 
 (defun lsp-metals-doctor-run ()
   "Open the Metals doctor to troubleshoot potential build problems."
