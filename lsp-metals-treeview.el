@@ -56,6 +56,15 @@
 (require 'lsp-treemacs)
 (require 'lsp-metals-protocol)
 
+(dolist (method '("metals/treeViewChildren"
+                  "metals/treeViewVisibilityDidChange"
+                  "metals/treeViewNodeCollapseDidChange"
+                  "metals/treeViewReveal"))
+  (add-to-list 'lsp-method-requirements
+               `(,method :check-command (lambda (workspace)
+                                          (eq (lsp--workspace-server-id workspace) 'metals)))
+               t))
+
 (defcustom lsp-metals-treeview-logging nil
   "If non nil log treeview trace/debug messages to the `lsp-log' for debugging."
   :group 'lsp-metals-treeview
