@@ -346,6 +346,7 @@ match has it displayed either as additional decorations."
 (defconst lsp-metals--javap-format-id "javap")
 
 (defconst lsp-metals--javap-verbose-format-id "javap-verbose")
+(defconst lsp-metals--nir-format-id "nir")
 
 (defconst lsp-metals--semanticdb-compact-format-id "semanticdb-compact")
 
@@ -355,6 +356,7 @@ match has it displayed either as additional decorations."
 
 (defconst lsp-metals--all-format-ids (list lsp-metals--javap-format-id
                                            lsp-metals--javap-verbose-format-id
+                                           lsp-metals--nir-format-id
                                            lsp-metals--semanticdb-compact-format-id
                                            lsp-metals--semanticdb-detailed-format-id
                                            lsp-metals--tasty-decoded-format-id))
@@ -557,6 +559,11 @@ for more information on the metals \"files-decode\" command."
   "View javap verbose a class in the for current file."
   (interactive)
   (lsp-metals-decode-file lsp-metals--javap-verbose-format-id))
+
+(defun lsp-metals-view-nir ()
+  "View NIR for a class in the current file."
+  (interactive)
+  (lsp-metals-decode-file lsp-metals--nir-format-id))
 
 (defun lsp-metals-view-semanticdb-compact ()
   "View semanticdb compact for current file."
