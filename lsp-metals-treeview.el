@@ -585,8 +585,9 @@ do not show an icon."
 The message will contain the COMMAND and optional ARGS.  Send the
 command asynchronously rather than the default `lsp-mode' of synchronous."
   (lsp-request-async "workspace/executeCommand"
-                     (list :command command
-                           :arguments args)
+                     (if args
+                         (list :command command :arguments args)
+                       (list :command command))
                      #'ignore
                      :mode 'detached))
 
