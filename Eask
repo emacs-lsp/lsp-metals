@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "lsp-metals"
          "1.0.0"
          "Scala Client settings")
