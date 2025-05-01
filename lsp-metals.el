@@ -722,7 +722,6 @@ WORKSPACE is the workspace the notification was received from."
                         (`"metals-diagnostics-focus" #'lsp-metals--diagnostics-focus)
                         (`"metals-goto-location" #'lsp-metals--goto-location)
                         (`"metals-echo-command" #'lsp-metals--echo-command)
-                        (`"metals-model-refresh" #'lsp-metals--model-refresh)
                         (`"metals-show-stacktrace" #'lsp-metals--show-stacktrace)
                         (`"reset-choice" #'lsp-metals--reset-choice)
                         (c (ignore (lsp-warn "Unknown metals client command: %s" c))))))
@@ -808,16 +807,6 @@ PARAMS are the action params."
            :request "launch"
            :noDebug no-debug))))
 
-(defun lsp-metals--model-refresh (workspace)
-  "Handle `metals-model-refresh' notification refreshing lenses.
-WORKSPACE is the workspace the notification was received from."
-  (->> workspace
-       (lsp--workspace-buffers)
-       (mapc (lambda (buffer)
-               (with-current-buffer buffer
-                 (when (bound-and-true-p lsp-lens-mode)
-                   (lsp-lens--schedule-refresh t)))))))
-
 (defun lsp-metals--status-string-keymap (workspace command?)
   "Keymap for `metals/status' notification.
 WORKSPACE is the workspace we received notification from.
@@ -874,7 +863,6 @@ WORKSPACE is the workspace we received notification from."
                   :notification-handlers (ht ("metals/executeClientCommand" #'lsp-metals--execute-client-command)
                                              ("metals/publishDecorations" #'lsp-metals--publish-decorations)
                                              ("metals/treeViewDidChange" #'lsp-metals-treeview--did-change)
-                                             ("metals-model-refresh" #'lsp-metals--model-refresh)
                                              ("metals/status" #'lsp-metals--status-string))
                   :request-handlers (ht ("metals/quickPick" #'lsp-metals--quick-pick)
                                         ("metals/inputBox" #'lsp-metals--input-box))
