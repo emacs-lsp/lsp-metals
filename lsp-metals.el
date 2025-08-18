@@ -2,7 +2,8 @@
 
 ;; Copyright (C) 2018-2019 Ross A. Baker <ross@rossabaker.com>, Evgeny Kurnevsky <kurnevsky@gmail.com>
 
-;; Version: 1.0.0
+;; Package-Version: 20250228.2145
+;; Package-Revision: 345b4fa80e31
 ;; Package-Requires: ((emacs "28.1") (scala-mode "0.23") (lsp-mode "7.0") (lsp-treemacs "0.2") (dap-mode "0.3") (dash "2.18.0") (f "0.20.0") (ht "2.0") (treemacs "3.1"))
 ;; Author: Ross A. Baker <ross@rossabaker.com>
 ;;         Evgeny Kurnevsky <kurnevsky@gmail.com>
@@ -251,6 +252,34 @@ on Windows)."
   :group 'lsp-metals
   :package-version '(lsp-metals . "1.3"))
 
+(defcustom lsp-metals-auto-import-build nil
+  "Automatically import builds rather than prompting the user to choose. \"initial\" will only automatically import a build when a project is first opened, \"all\" will automate build imports after subsequent changes as well."
+  :type '(choice
+          (const :tag "Off" nil)
+          (const :tag "Initial" "initial")
+          (const :tag "All" "all"))
+  :group 'lsp-metals)
+
+(defcustom lsp-metals-default-bsp-to-build-tool nil
+  "If your build tool can also serve as a build server, default to using it instead of Bloop."
+  :type 'boolean
+  :group 'lsp-metals)
+
+(defcustom lsp-metals-enable-best-effort nil
+  "When using Scala 3, use best effort compilation to improve Metals correctness when the workspace doesn't compile."
+  :type 'boolean
+  :group 'lsp-metals)
+
+(defcustom lsp-metals-start-mcp-server nil
+  "If Metals should start the MCP (SSE) server, that an AI agent can connect to."
+  :type 'boolean
+  :group 'lsp-metals)
+
+(defcustom lsp-metals-mcp-client ""
+  "This is used in situations where the client you're using doesn't match the editor you're using or you also want an extra config generated, which is what Metals will default to. For example if you use claude code cli in your terminal while you have Metals running you would set this to \"claude\". NOTE: This will generate an extra config if Metals supports the client you are passing in and it will still generate the one matching your editor if it's also supported."
+  :type '(string)
+  :group 'lsp-metals)
+
 (defcustom lsp-metals-java-format.eclipse-profile ""
   "The eclipse profile name.
 
@@ -372,6 +401,11 @@ match has it displayed either as additional decorations."
    ("metals.bloop-version" lsp-metals-bloop-version)
    ("metals.super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled t)
    ("metals.enable-indent-on-paste" lsp-metals-enable-indent-on-paste t)
+   ("metals.autoImportBuild" lsp-metals-auto-import-build)
+   ("metals.enableBestEffort" lsp-metals-enable-best-effort t)
+   ("metals.startMcpServer" lsp-metals-start-mcp-server t)
+   ("metals.mcpClient" lsp-metals-mcp-client)
+   ("metals.defaultBspToBuildTool" lsp-metals-default-bsp-to-build-tool)
    ("metals.remote-language-server" lsp-metals-remote-language-server)
    ("metals.fallback-scala-version" lsp-metals-fallback-scala-version)
    ("metals.test-user-interface" lsp-metals-test-user-interface)
@@ -674,7 +708,7 @@ WORKSPACE is the workspace the client command was received from."
 WORKSPACE is the workspace the notification was received from."
   (with-lsp-workspace workspace
     (let* ((file (lsp--uri-to-path uri))
-            (buffer (find-buffer-visiting file)))
+           (buffer (find-buffer-visiting file)))
       (when buffer
         (with-current-buffer buffer
           (lsp--remove-overlays 'metals-decoration)
@@ -825,19 +859,19 @@ COMMAND is the client command to execute."
   (when command?
     (-doto (make-sparse-keymap)
       (define-key [mode-line mouse-1]
-        (lambda ()
-          (interactive)
-          (lsp-metals--execute-client-command workspace (lsp-make-execute-command-params :command command?)))))))
+                  (lambda ()
+                    (interactive)
+                    (lsp-metals--execute-client-command workspace (lsp-make-execute-command-params :command command?)))))))
 
 (lsp-defun lsp-metals--status-string (workspace (&MetalsStatusParams :text :hide? :tooltip? :command?))
   "Handle `metals/status' notification.
 WORKSPACE is the workspace we received notification from."
   (if (or hide? (s-blank-str? text))
-    (lsp-workspace-status nil workspace)
+      (lsp-workspace-status nil workspace)
     (lsp-workspace-status (propertize text
-                            'help-echo tooltip?
-                            'local-map (lsp-metals--status-string-keymap workspace command?))
-      workspace)))
+                                      'help-echo tooltip?
+                                      'local-map (lsp-metals--status-string-keymap workspace command?))
+                          workspace)))
 
 (lsp-defun lsp-metals--quick-pick (_workspace (&MetalsQuickPickParams :items :place-holder?))
   "Provide a string value by picking from given options."
@@ -897,13 +931,13 @@ configuration name.  VAR is the variable holding the value of the configuration.
   (let ((func-name (intern (format "lsp-metals-toggle-%s" name))))
     `(defun ,func-name ()
        ,(format "Toggle LSP metals %s config" name)
-      (interactive)
-      (setq ,var (not ,var))
-      (lsp-register-custom-settings '((,(format "metals.%s" config) ,var t)))
-      (with-lsp-workspaces (lsp-metals--workspaces)
-        (lsp--set-configuration (lsp-configuration-section "metals")))
-      (let ((status (if ,var "on" "off")))
-        (lsp--info "Turned %s %s" status ,name)))))
+       (interactive)
+       (setq ,var (not ,var))
+       (lsp-register-custom-settings '((,(format "metals.%s" config) ,var t)))
+       (with-lsp-workspaces (lsp-metals--workspaces)
+         (lsp--set-configuration (lsp-configuration-section "metals")))
+       (let ((status (if ,var "on" "off")))
+         (lsp--info "Turned %s %s" status ,name)))))
 
 (lsp-metals--create-bool-toggle "show-super-method-lenses" "super-method-lenses-enabled" lsp-metals-super-method-lenses-enabled)
 (lsp-metals--create-bool-toggle "enable-semantic-highlighting" "enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting)
