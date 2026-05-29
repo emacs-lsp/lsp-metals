@@ -379,11 +379,11 @@ match has it displayed either as additional decorations."
    ("metals.java-format.eclipse-profile" lsp-metals-java-format.eclipse-profile)
    ("metals.scala-cli-launcher" lsp-metals-scala-cli-launcher)
    ("metals.enable-semantic-highlighting" lsp-metals-enable-semantic-highlighting t)
-   ("inlay-hints.inferredTypes.enable" lsp-metals-inlay-hints-enable-inferred-types t)
-   ("inlay-hints.implicitConversions.enable" lsp-metals-inlay-hints-enable-implicit-conversions t)
-   ("inlay-hints.implicitArguments.enable" lsp-metals-inlay-hints-enable-implicit-arguments t)
-   ("inlay-hints.typeParameters.enable" lsp-metals-inlay-hints-enable-type-parameters t)
-   ("inlay-hints.hintsInPatternMatch.enable" lsp-metals-inlay-hints-enable-hints-in-pattern-match t)))
+   ("metals.inlay-hints.inferredTypes.enable" lsp-metals-inlay-hints-enable-inferred-types t)
+   ("metals.inlay-hints.implicitConversions.enable" lsp-metals-inlay-hints-enable-implicit-conversions t)
+   ("metals.inlay-hints.implicitArguments.enable" lsp-metals-inlay-hints-enable-implicit-arguments t)
+   ("metals.inlay-hints.typeParameters.enable" lsp-metals-inlay-hints-enable-type-parameters t)
+   ("metals.inlay-hints.hintsInPatternMatch.enable" lsp-metals-inlay-hints-enable-hints-in-pattern-match t)))
 
 (lsp-dependency
  'coursier
